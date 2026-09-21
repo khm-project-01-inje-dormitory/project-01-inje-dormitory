@@ -10,7 +10,6 @@ import GalleryTab from "./GalleryTab";
 import ReviewsTab from "./ReviewsTab";
 import SettingsTab from "./SettingsTab";
 import PushSetup from "@/components/PushSetup";
-import { MODE_LABEL } from "@/lib/mode";
 import type { Settings } from "@/types";
 
 type Tab = "stats" | "reservations" | "deposits" | "gallery" | "reviews" | "settings";
@@ -24,7 +23,8 @@ const TABS: Array<[Tab, string, typeof BarChart3]> = [
   ["settings", "설정", Settings2],
 ];
 
-export default function AdminDashboard() {
+/** modeLabel은 서버(AdminPage)에서 계산해 전달 — 클라이언트 번들은 service key 환경변수를 볼 수 없어 항상 데모로 표시되는 버그 수정 */
+export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
   const [tab, setTab] = useState<Tab>("stats");
   const [settings, setSettings] = useState<Settings | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-black truncate">{settings?.pension_name ?? "관리자"} · 대시보드</h1>
-            <p className="text-[11px] text-muted-foreground">{MODE_LABEL}</p>
+            <p className="text-[11px] text-muted-foreground">{modeLabel}</p>
           </div>
           <div className="flex items-center gap-2">
             <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center hover:bg-muted" onClick={refresh} title="새로고침">
