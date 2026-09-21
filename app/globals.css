@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   디자인 토큰 (Design Tokens)
+   웜 브라운/앰버 — 숙소 감성. 하드코딩된 색상은 사용하지 않고
+   반드시 아래 토큰(Tailwind 매핑: tailwind.config.ts)만 사용합니다.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --primary: 154 76 22;            /* 웜 브라운 */
+  --primary-foreground: 255 253 250;
+  --primary-soft: 251 243 230;     /* 연한 크림 배경 */
+
+  --background: 250 248 244;       /* 웜 화이트 */
+  --foreground: 41 37 36;
+  --card: 255 255 255;
+  --muted: 243 238 230;
+  --muted-foreground: 122 111 100;
+
+  --border: 233 226 215;
+  --ring: 154 76 22;
+
+  --success: 5 122 85;
+  --warning: 180 120 7;
+  --danger: 199 45 76;
+
+  --radius: 1rem;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-feature-settings: "ss01";
+  word-break: keep-all;
+}
+
+/* 공통 카드 스타일 */
+.card-surface {
+  @apply bg-card border border-border rounded-card shadow-card;
+}
+
+/* 입력 요소 공통 */
+.input {
+  @apply w-full rounded-xl border border-border bg-card px-4 py-3 text-[15px]
+    placeholder:text-muted-foreground/60
+    focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-ring
+    transition-colors;
+}
+
+.label {
+  @apply block text-sm font-semibold text-foreground mb-1.5;
+}
+
+/* 버튼 공통 */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3
+    text-[15px] font-bold transition-all active:scale-[0.98]
+    disabled:opacity-50 disabled:pointer-events-none select-none;
+}
+.btn-primary { @apply btn bg-primary text-primary-foreground shadow-card hover:brightness-110; }
+.btn-soft { @apply btn bg-primary-soft text-primary hover:brightness-[0.98]; }
+.btn-outline { @apply btn border border-border bg-card text-foreground hover:bg-muted; }
+.btn-danger { @apply btn border border-rose-200 bg-card text-danger hover:bg-rose-50; }
+
+/* 상태 배지 */
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold;
+}
+
+/* 숫자 필드 화살표 제거 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 날짜 입력 캘린더 아이콘 색 보정 */
+input[type="date"] { min-height: 48px; }
