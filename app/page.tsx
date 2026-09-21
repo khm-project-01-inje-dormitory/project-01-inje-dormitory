@@ -6,6 +6,8 @@ import { store, computeAvailability } from "@/lib/store";
 import { addDays, fmtDateKorean, fmtWon, maskName, todayKST } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0; // 캐시 완전 금지 — 설정 변경이 즉시 반영
+export const fetchCache = "force-no-store";
 
 export default async function Home() {
   const [settings, photos, reservations, blocked, allReviews] = await Promise.all([

@@ -5,6 +5,8 @@ import { store } from "@/lib/store";
 import { fmtWon } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0; // 캐시 완전 금지 — 설정 변경이 즉시 반영
+export const fetchCache = "force-no-store";
 
 export default async function ReservePage() {
   const settings = await store.getSettings();
