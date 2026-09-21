@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { store, computeAvailability } from "@/lib/store";
 import { todayKST } from "@/lib/format";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 /** 공개: 날짜별 잔여 현황(휴무일 포함) ?from=YYYY-MM-DD&days=N */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

@@ -3,6 +3,9 @@ import { store } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 import { maskName } from "@/lib/format";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 const normPhone = (s: string) => s.replace(/[^0-9]/g, "");
 
 /** 공개: 노출 중인 후기 + 평균 별점 (?all=1 → 관리자 전체) */

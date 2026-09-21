@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 /** 관리자: 휴무일 목록 */
 export async function GET(req: Request) {
   if (!isAdmin(req)) return NextResponse.json({ error: "권한 없음" }, { status: 401 });

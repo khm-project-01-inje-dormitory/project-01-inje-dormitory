@@ -4,6 +4,9 @@ import { isAdmin } from "@/lib/auth";
 import { notifyAdmins } from "@/lib/push";
 import { makeCode, nightsBetween, todayKST } from "@/lib/format";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 /** 관리자: 전체 예약 목록 */
 export async function GET(req: Request) {
   if (!isAdmin(req)) return NextResponse.json({ error: "권한 없음" }, { status: 401 });

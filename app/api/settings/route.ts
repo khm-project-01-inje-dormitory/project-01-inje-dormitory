@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 /** 공개: 숙소 정보/요금/계좌 (랜딩·예약 화면용) */
 export async function GET() {
   return NextResponse.json({ settings: await store.getSettings() });

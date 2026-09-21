@@ -4,6 +4,9 @@ import { isAdmin } from "@/lib/auth";
 import { notifyAdmins } from "@/lib/push";
 import { fmtDateKorean, fmtWon, todayKST } from "@/lib/format";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 /**
  * 관리자 아침 브리핑 — 오늘 체크인/체크아웃/입금대기 요약을 푸시로 발송
  * Vercel Cron이 매일 아침(KST 08:30) Authorization: Bearer CRON_SECRET 으로 호출,

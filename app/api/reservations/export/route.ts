@@ -3,6 +3,9 @@ import { store } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 import { STATUS_LABEL, REFUND_LABEL } from "@/types";
 
+// 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
+export const dynamic = "force-dynamic";
+
 const HEAD = [
   "예약코드", "상태", "환불상태", "예약자", "입금자", "연락처",
   "체크인", "체크아웃", "박수", "인원", "1인가격", "총액", "요청사항", "신청일시",
