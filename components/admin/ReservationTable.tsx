@@ -1,22 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown, Undo2, Trash2 } from "lucide-react";
+import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown, Undo2, Trash2, Archive } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
 
 const STATUS_STYLE: Record<ReservationStatus, string> = {
-  pending: "bg-amber-50 text-warning border border-amber-200",
-  confirmed: "bg-emerald-50 text-success border border-emerald-200",
-  cancelled: "bg-rose-50 text-danger border border-rose-200",
-  completed: "bg-slate-100 text-slate-600 border border-slate-200",
+  pending: "bg-warning/10 text-warning border border-warning/20",
+  confirmed: "bg-success/10 text-success border border-success/20",
+  cancelled: "bg-danger/10 text-danger border border-danger/20",
+  completed: "bg-muted text-muted-foreground border border-border/40",
 };
 
 const REFUND_STYLE: Record<RefundStatus, string> = {
   none: "",
-  pending: "bg-rose-50 text-danger border border-rose-200",
-  done: "bg-emerald-50 text-success border border-emerald-200",
+  pending: "bg-danger/10 text-danger border border-danger/20",
+  done: "bg-success/10 text-success border border-success/20",
 };
 
 /** 예약관리(all) / 입금확인(pending) 공용 테이블 — 카톡 안내문 복사·환불 관리·CSV 내보내기 포함 */
@@ -70,7 +70,7 @@ export default function ReservationTable({
       setShowHidden(false);
       await load();
       onChanged?.();
-    } catch (e) { alert(e instanceof Error ? e.message : "복원 중 오류가 발생했습니다."); }
+    } catch (e) { alert(describeError(e, "복원")); }
     finally { setBusyId(null); }
   }
 
@@ -84,7 +84,7 @@ export default function ReservationTable({
       if (!res.ok) throw new Error((await res.json()).error ?? "영구삭제 실패");
       await load();
       onChanged?.();
-    } catch (e) { alert(e instanceof Error ? e.message : "영구삭제 중 오류가 발생했습니다."); }
+    } catch (e) { alert(describeError(e, "영구삭제")); }
     finally { setBusyId(null); }
   }
 
@@ -183,10 +183,10 @@ export default function ReservationTable({
               : "border-border bg-card text-muted-foreground"}`}>
           전체 {rows.length}건
         </button>
-        {([["pending", "bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400 border-amber-300 text-amber-950 shadow-sm ring-2 ring-amber-200"],
-           ["confirmed", "bg-sky-50 text-sky-700 border-sky-200", "bg-sky-500 border-sky-400 text-white shadow-sm ring-2 ring-sky-200"],
-           ["completed", "bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-500 border-emerald-400 text-white shadow-sm ring-2 ring-emerald-200"],
-           ["cancelled", "bg-rose-50 text-rose-700 border-rose-200", "bg-rose-500 border-rose-400 text-white shadow-sm ring-2 ring-rose-200"]] as const).map(([k, idle, active]) => {
+        {([["pending", "bg-warning/10 text-warning border border-warning/20", "bg-warning/15 text-warning border-warning/40 ring-2 ring-warning/25 shadow-sm"],
+           ["confirmed", "bg-success/10 text-success border border-success/20", "bg-success/15 text-success border-success/40 ring-2 ring-success/25 shadow-sm"],
+           ["completed", "bg-muted text-muted-foreground border border-border/40", "bg-muted text-foreground border-border ring-2 ring-ring/20 shadow-sm"],
+           ["cancelled", "bg-danger/10 text-danger border border-danger/20", "bg-danger/15 text-danger border-danger/40 ring-2 ring-danger/25 shadow-sm"]] as const).map(([k, idle, active]) => {
           const count = rows.filter((r) => r.status === k).length;
           const on = statusFilter === k;
           return (
@@ -203,7 +203,7 @@ export default function ReservationTable({
           <button type="button" onClick={() => setShowHidden(!showHidden)} aria-pressed={showHidden}
             title={showHidden ? "숨김 보관함 닫기" : "숨김된 예약 보기"}
             className={`badge border transition-all duration-200 select-none cursor-pointer hover:scale-[1.04] hover:shadow-sm active:scale-95 ${
-              showHidden ? "bg-slate-600 border-slate-500 text-white shadow-sm ring-2 ring-slate-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+              showHidden ? "bg-muted text-foreground border-border ring-2 ring-ring/20 shadow-sm" : "bg-muted/50 text-muted-foreground border border-border/40"}`}>
             숨김 {hiddenRows.length}건{showHidden ? " ✓" : ""}
           </button>
         )}
@@ -215,7 +215,7 @@ export default function ReservationTable({
             <ArrowUpDown className="w-3.5 h-3.5 absolute left-2.5 pointer-events-none text-muted-foreground" />
             <select value={sortKey} onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
               aria-label="정렬 기준"
-              className="appearance-none input !py-2 !pl-8 !pr-8 text-sm cursor-pointer bg-card">
+              className="appearance-none input !py-2 !pl-8 !pr-8 text-sm cursor-pointer bg-card focus-visible:ring-2 focus-visible:ring-ring/40">
               <option value="newest">최근 신청순</option>
               <option value="checkin">투숙 임박순</option>
               <option value="amount_desc">금액 높은순</option>
@@ -244,12 +244,16 @@ export default function ReservationTable({
 
       {showHidden ? (
         hiddenRows.length === 0 ? (
-          <div className="card-surface p-10 text-center text-muted-foreground">숨김된 예약이 없습니다.</div>
+          <div className="card-surface p-10 text-center">
+            <Archive className="w-8 h-8 mx-auto text-muted-foreground/50" />
+            <p className="mt-3 text-sm text-muted-foreground">숨김된 예약이 없습니다.</p>
+            <p className="mt-1 text-xs text-muted-foreground/70">예약 카드의 "숨김" 버튼을 누르면 여기에 보관됩니다.</p>
+          </div>
         ) : (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground px-1">숨김된 예약 {hiddenRows.length}건 — 복원하면 목록으로 돌아갑니다. (숨김·복원 모두 감사로그에 기록됩니다)</p>
             {hiddenRows.map((r) => (
-              <div key={r.id} className="card-surface p-4 sm:px-5">
+              <div key={r.id} className="card-surface p-4 sm:px-5 border-border/40 hover:shadow-card transition-shadow">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -264,7 +268,7 @@ export default function ReservationTable({
                   <div className="flex items-center gap-2">
                     <button className="btn-primary !py-2 !px-4 text-sm inline-flex items-center gap-1.5" disabled={busyId === r.id}
                       onClick={() => restoreHidden(r)}>
-                      <Undo2 className="w-4 h-4" /> 목록으로 복원
+                      {busyId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Undo2 className="w-4 h-4" />} 목록으로 복원
                     </button>
                     <button className="btn-danger !py-2 !px-4 text-sm inline-flex items-center gap-1.5" disabled={busyId === r.id}
                       onClick={() => purgeHidden(r)}>
@@ -289,10 +293,10 @@ export default function ReservationTable({
                   <div className="flex items-center gap-2 flex-wrap">
                     <b className="text-[15px]">{r.guest_name}</b>
                     {(sortKey === "checkin" || true) && r.check_in === todayKST() && r.status !== "cancelled" && r.status !== "completed" && (
-                      <span className="badge bg-rose-500 text-white border border-rose-400 !py-0.5 !px-2 text-[10px]">오늘 체크인</span>
+                      <span className="badge bg-danger/15 text-danger border border-danger/30 !py-0.5 !px-2 text-xs font-bold">오늘 체크인</span>
                     )}
                     {r.check_in === shiftDate(1) && r.status !== "cancelled" && r.status !== "completed" && (
-                      <span className="badge bg-amber-100 text-amber-800 border border-amber-300 !py-0.5 !px-2 text-[10px]">내일 체크인</span>
+                      <span className="badge bg-warning/15 text-warning border border-warning/30 !py-0.5 !px-2 text-xs font-bold">내일 체크인</span>
                     )}
                     <span className="text-xs text-muted-foreground">{r.depositor !== r.guest_name ? `입금자: ${r.depositor}` : ""}</span>
                     <span className={`badge ${STATUS_STYLE[r.status]}`}>{STATUS_LABEL[r.status]}</span>
@@ -399,6 +403,17 @@ function shiftDate(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** 실패 원인 구분 — 네트워크/권한/서버 메시지 */
+function describeError(e: unknown, what: string): string {
+  if (e instanceof Error) {
+    const m = e.message;
+    if (/Failed to fetch|NetworkError|network/i.test(m)) return `${what} 중 네트워크 오류가 발생했습니다. 연결을 확인해 주세요.`;
+    if (/권한|401/i.test(m)) return "권한이 만료되었습니다. 다시 로그인해 주세요.";
+    return m || `${what} 중 오류가 발생했습니다.`;
+  }
+  return `${what} 중 오류가 발생했습니다.`;
+}
+
 /** 예약 진행 단계 — 입금대기 → 예약확정 → 투숙완료 (취소는 진행 중단 표시) */
 const STAGES: { key: ReservationStatus; label: string }[] = [
   { key: "pending", label: "입금대기" },
@@ -421,8 +436,8 @@ function ProgressTrack({ status }: { status: ReservationStatus }) {
   }
   const idx = STAGES.findIndex((s) => s.key === status);
   const pct = (idx / (STAGES.length - 1)) * 100;
-  const fill = idx === 0 ? "bg-amber-400" : idx === 1 ? "bg-primary" : "bg-emerald-500";
-  const tone = idx === 0 ? "text-amber-500" : idx === 1 ? "text-primary" : "text-emerald-600";
+  const fill = idx === 0 ? "bg-warning" : idx === 1 ? "bg-primary" : "bg-success";
+  const tone = idx === 0 ? "text-warning" : idx === 1 ? "text-primary" : "text-success";
   return (
     <div className="mt-4 pt-3 border-t border-border" aria-label={`예약 진행: ${STATUS_LABEL[status]}`}>
       <div className="relative h-1.5 rounded-full bg-muted">
