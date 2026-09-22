@@ -59,6 +59,8 @@ export interface Settings {
   account_number: string;
   account_holder: string;
   contact_phone: string;
+  /** 관리자 비밀번호 해시 (salt:sha256) — 빈 값이면 환경변수 ADMIN_PASSWORD 사용 */
+  admin_password_hash: string;
   check_in_time: string;
   check_out_time: string;
   /** 수용 인원 초과 신청 자동 차단 (false = 경고 후 접수) */

@@ -38,9 +38,6 @@ export default function AdminLoginPage() {
           <LockKeyhole className="w-7 h-7" />
         </div>
         <h1 className="text-xl font-black text-center mt-4">관리자 로그인</h1>
-        <p className="text-xs text-muted-foreground text-center mt-1">
-          비밀번호는 환경변수 <code className="font-mono">ADMIN_PASSWORD</code>로 설정됩니다.
-        </p>
         <input
           type="password" className="input mt-6 text-center tracking-widest" placeholder="비밀번호"
           value={password} onChange={(e) => setPassword(e.target.value)} autoFocus
@@ -49,9 +46,6 @@ export default function AdminLoginPage() {
         <button type="submit" className="btn-primary w-full mt-4" disabled={loading || !password}>
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "로그인"}
         </button>
-        <p className="text-[11px] text-muted-foreground text-center mt-4">
-          데모 기본 비밀번호: <code className="font-mono">admin1234</code> (운영 전 반드시 변경)
-        </p>
       </form>
     </main>
   );

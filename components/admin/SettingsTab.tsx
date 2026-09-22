@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarOff, Loader2, Plus, Save, X } from "lucide-react";
+import { CalendarOff, Loader2, Plus, Save, X, ShieldCheck } from "lucide-react";
 import { fmtWon } from "@/lib/format";
 import type { BlockedDate, Settings } from "@/types";
 
 /** 사이트 설정 — 요금/인원/휴무일/마감정책/위치·주차/계좌/소개 */
 export default function SettingsTab({ settings }: { settings: Settings }) {
   const [form, setForm] = useState<Settings>(settings);
+  const [pw, setPw] = useState({ cur: "", next: "", confirm: "" });
+  const [pwMsg, setPwMsg] = useState("");
+  const [pwOk, setPwOk] = useState(false);
+  const [pwBusy, setPwBusy] = useState(false);
   const [priceText, setPriceText] = useState(String(settings.per_person_price));
   const [maxGuestsText, setMaxGuestsText] = useState(String(settings.max_guests));
   const [saving, setSaving] = useState(false);
@@ -100,6 +104,38 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
           <input className="input" value={form.hero_badge_text || ""} maxLength={40}
             onChange={(e) => set("hero_badge_text", e.target.value)} placeholder="집 전체 대여 · 방 선택 없이 자유롭게" />
         </div>
+      </div>
+
+
+      {/* 보안 — 비밀번호 변경 */}
+      <div className="card-surface p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <h3 className="font-black">보안 — 비밀번호 변경</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">변경 즉시 반영됩니다 (재배포 불필요). 환경변수 ADMIN_PASSWORD는 긴급 복구용으로 유지됩니다.</p>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div><label className="label">현재 비밀번호</label><input type="password" className="input" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} /></div>
+          <div><label className="label">새 비밀번호 (8자 이상)</label><input type="password" className="input" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></div>
+          <div><label className="label">새 비밀번호 확인</label><input type="password" className="input" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} /></div>
+        </div>
+        {pwMsg && <p className={`text-xs font-bold ${pwOk ? "text-success" : "text-danger"}`}>{pwMsg}</p>}
+        <button type="button" className="btn-primary !py-2.5 !px-5 text-sm"
+          disabled={pwBusy || !pw.cur || !pw.next}
+          onClick={async () => {
+            if (pw.next !== pw.confirm) { setPwOk(false); setPwMsg("새 비밀번호가 일치하지 않습니다."); return; }
+            setPwBusy(true); setPwMsg("");
+            try {
+              const res = await fetch("/api/admin/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ current: pw.cur, next: pw.next }) });
+              const d = await res.json();
+              if (!res.ok) throw new Error(d.error || "변경 실패");
+              setPwOk(true); setPwMsg("✓ 비밀번호가 변경되었습니다 — 다음 로그인부터 적용됩니다.");
+              setPw({ cur: "", next: "", confirm: "" });
+            } catch (e) { setPwOk(false); setPwMsg(e instanceof Error ? e.message : "변경 중 오류가 발생했습니다."); }
+            finally { setPwBusy(false); }
+          }}>
+          {pwBusy ? "저장 중…" : "비밀번호 변경"}
+        </button>
       </div>
 
       {/* 예약 일시중지 — 안내문·재개일 (토글은 대시보드 헤더 아래에 있음) */}

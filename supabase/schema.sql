@@ -154,3 +154,6 @@ alter table settings add column if not exists tagline_visible boolean not null d
 alter table settings add column if not exists booking_paused boolean not null default false;
 alter table settings add column if not exists booking_pause_message text not null default '지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.';
 alter table settings add column if not exists booking_resume_date text not null default '';
+
+-- 업그레이드: 관리자 비밀번호 해시 (빈 값이면 환경변수 ADMIN_PASSWORD 사용 — 긴급 복구 백도어)
+alter table settings add column if not exists admin_password_hash text not null default '';

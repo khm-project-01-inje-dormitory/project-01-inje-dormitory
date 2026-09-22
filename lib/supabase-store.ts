@@ -53,6 +53,7 @@ const SETTINGS_SEED: Partial<Settings> = {
   parking_info: "",
   arrival_info: "",
   booking_paused: false,
+  admin_password_hash: "",
   hero_badge_visible: true,
   booking_pause_message: "지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.",
   booking_resume_date: "",

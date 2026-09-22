@@ -2,6 +2,8 @@
   "settings": {
     "id": 1,
     "booking_paused": false,
+    "admin_password_hash": "f32ce9921cacce10c730c8d081a31e83:7eb3fb28e08931aa3dd41d3422a20addd5f7056db3f9848bbdcf91d8149c115c",
+    "hero_badge_visible": true,
     "booking_pause_message": "지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.",
     "booking_resume_date": "",
     "hero_badge_text": "집 전체 대여 · 방 선택 없이 자유롭게",
@@ -31,7 +33,7 @@
     "map_link": "",
     "parking_info": "",
     "arrival_info": "",
-    "updated_at": "2026-09-22T10:32:02.009Z"
+    "updated_at": "2026-09-22T16:55:10.532Z"
   },
   "reservations": [
     {
@@ -720,6 +722,46 @@
         "deleted_at": "2026-09-22T10:32:02.025Z"
       },
       "created_at": "2026-09-22T10:32:02.025Z"
+    },
+    {
+      "id": "043924e7-0c8b-4976-8641-11d9760ac656",
+      "actor": "admin",
+      "action": "password_change",
+      "target_id": "admin",
+      "target_label": "관리자 비밀번호 변경",
+      "before": {},
+      "after": {},
+      "created_at": "2026-09-22T16:54:10.843Z"
+    },
+    {
+      "id": "fbd999b8-8f96-407b-9297-a84905ab6a9a",
+      "actor": "admin",
+      "action": "password_change",
+      "target_id": "admin",
+      "target_label": "관리자 비밀번호 변경",
+      "before": {},
+      "after": {},
+      "created_at": "2026-09-22T16:54:10.866Z"
+    },
+    {
+      "id": "6d25c376-a86c-4f31-acba-4df53fcda4fd",
+      "actor": "admin",
+      "action": "password_change",
+      "target_id": "admin",
+      "target_label": "관리자 비밀번호 변경",
+      "before": {},
+      "after": {},
+      "created_at": "2026-09-22T16:55:10.516Z"
+    },
+    {
+      "id": "71cbb71a-4ab8-41f6-bc47-8321ef3fd30d",
+      "actor": "admin",
+      "action": "password_change",
+      "target_id": "admin",
+      "target_label": "관리자 비밀번호 변경",
+      "before": {},
+      "after": {},
+      "created_at": "2026-09-22T16:55:10.533Z"
     }
   ]
 }
