@@ -133,3 +133,14 @@ create table if not exists audit_logs (
   created_at timestamptz not null default now()
 );
 alter table audit_logs enable row level security;
+
+-- 업그레이드: 메인 소개 카드 3개 편집/표시 설정
+alter table settings add column if not exists feature1_title text not null default '집 전체 통대여';
+alter table settings add column if not exists feature1_body text not null default '도착하시면 집 안 어느 방에서든 자유롭게 머무실 수 있습니다.';
+alter table settings add column if not exists feature2_title text not null default '';
+alter table settings add column if not exists feature2_body text not null default '인원 단위 예약으로 가족·친구 모임에 딱 맞습니다.';
+alter table settings add column if not exists feature3_title text not null default '간편 입금 결제';
+alter table settings add column if not exists feature3_body text not null default '카카오페이·토스로 바로 송금하세요. 카드 결제 없음.';
+alter table settings add column if not exists feature1_visible boolean not null default true;
+alter table settings add column if not exists feature2_visible boolean not null default true;
+alter table settings add column if not exists feature3_visible boolean not null default true;

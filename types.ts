@@ -68,6 +68,16 @@ export interface Settings {
   map_link: string;
   parking_info: string;
   arrival_info: string;
+  /** 메인 소개 카드 3개 — 관리자 편집/숨김 (빈 값이면 기본 문구 사용) */
+  feature1_title: string;
+  feature1_body: string;
+  feature2_title: string;
+  feature2_body: string;
+  feature3_title: string;
+  feature3_body: string;
+  feature1_visible: boolean;
+  feature2_visible: boolean;
+  feature3_visible: boolean;
   updated_at: string;
 }
 

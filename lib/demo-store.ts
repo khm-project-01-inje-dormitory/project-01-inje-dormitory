@@ -26,6 +26,15 @@ interface DB {
 
 const DEFAULT_SETTINGS: Settings = {
   id: 1,
+  feature1_title: "집 전체 통대여",
+  feature1_body: "",
+  feature2_title: "",
+  feature2_body: "인원 단위 예약으로 가족·친구 모임에 딱 맞습니다.",
+  feature3_title: "간편 입금 결제",
+  feature3_body: "카카오페이·토스로 바로 송금하세요. 카드 결제 없음.",
+  feature1_visible: true,
+  feature2_visible: true,
+  feature3_visible: true,
   pension_name: "데모 펜션 라온하우",
   tagline: "숲과 별이 있는 집 — 집 전체를 통째로 빌려드립니다",
   description:

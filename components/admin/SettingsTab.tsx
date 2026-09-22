@@ -180,6 +180,38 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         )}
       </div>
 
+      {/* 메인 소개 카드 편집/표시 (3개) */}
+      <div className="card-surface p-5 space-y-4">
+        <div>
+          <h3 className="font-black">메인 소개 카드</h3>
+          <p className="text-xs text-muted-foreground mt-1">홈 화면 소개 섹션의 카드 3개 — 제목·내용을 바꾸거나 표시를 끌 수 있습니다.</p>
+        </div>
+        {([1, 2, 3] as const).map((n) => {
+          const tKey = `feature${n}_title` as keyof Settings;
+          const bKey = `feature${n}_body` as keyof Settings;
+          const vKey = `feature${n}_visible` as keyof Settings;
+          const title = String(form[tKey] ?? "");
+          const body = String(form[bKey] ?? "");
+          const visible = form[vKey] !== false;
+          return (
+            <div key={n} className="rounded-xl border border-border p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <b className="text-sm">카드 {n}</b>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
+                  <input type="checkbox" checked={visible} onChange={(e) => set(vKey, e.target.checked as never)} className="w-4 h-4 accent-[hsl(154,76%,22%)]" />
+                  표시
+                </label>
+              </div>
+              <input className="input" placeholder="제목" value={title} maxLength={30}
+                onChange={(e) => set(tKey, e.target.value as never)} disabled={!visible} />
+              <textarea className="input min-h-[56px] resize-none" placeholder="내용" value={body} maxLength={120}
+                onChange={(e) => set(bKey, e.target.value as never)} disabled={!visible} />
+            </div>
+          );
+        })}
+        <p className="text-xs text-muted-foreground">카드 1 내용을 비우면 한줄소개(태그라인)가 자동으로 들어갑니다.</p>
+      </div>
+
       {/* 예약 마감 정책 */}
       <div className="card-surface p-5">
         <h3 className="font-black mb-1">예약 자동 마감</h3>

@@ -48,17 +48,12 @@ export default async function Home() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
         <div className="relative max-w-5xl mx-auto w-full px-5 pb-12 pt-24 text-white">
-          {/* 중복 배지 제거 (소개 섹션의 '집 전체 통대여'와 중복) — 제목 + 블러 소개칩만 남김 */}
-          <h1 className="text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
+          <span className="badge bg-white/15 backdrop-blur text-white border border-white/20">
+            <HomeIcon className="w-3.5 h-3.5" /> 집 전체 대여 · 방 선택 없이 자유롭게
+          </span>
+          <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
             {settings.pension_name}
           </h1>
-          {/* 한줄소개 블러칩: inline-flex라 글자 길이에 따라 배경(블러)이 항상 맞춰 조정 — 관리자 수정 즉시 대응 */}
-          <p className="mt-3">
-            <span className="inline-flex items-start gap-2 max-w-full rounded-xl bg-white/15 backdrop-blur border border-white/20 px-3.5 py-2 text-left">
-              <HomeIcon className="w-4 h-4 mt-0.5 shrink-0" />
-              <span className="text-base sm:text-xl font-medium leading-relaxed">{settings.tagline}</span>
-            </span>
-          </p>
           {/* CTA: 가격 칩과 예약하기 버튼 — 그리드 2등분으로 가로폭 완전 동일, 세로 48px, 글자 중앙정렬 */}
           <div className="mt-6 grid [grid-template-columns:repeat(2,minmax(0,1fr))] gap-2.5 w-full max-w-sm">
             <div className="h-12 rounded-xl bg-white/95 text-foreground shadow-pop flex items-center justify-center gap-2">
@@ -75,11 +70,11 @@ export default async function Home() {
       <div className="max-w-5xl mx-auto px-5 space-y-10 mt-10">
         {/* ── 소개 ── */}
         <section className="grid sm:grid-cols-3 gap-3">
-          {[
-            { icon: <HomeIcon className="w-5 h-5" />, title: "집 전체 통대여", body: "도착하시면 집 안 어느 방에서든 자유롭게 머무실 수 있습니다." },
-            { icon: <Users className="w-5 h-5" />, title: `최대 ${settings.max_guests}명`, body: "인원 단위 예약으로 가족·친구 모임에 딱 맞습니다." },
-            { icon: <Banknote className="w-5 h-5" />, title: "간편 입금 결제", body: "카카오페이·토스로 바로 송금하세요. 카드 결제 없음." },
-          ].map((f) => (
+          {([
+            { show: settings.feature1_visible !== false, icon: <HomeIcon className="w-5 h-5" />, title: settings.feature1_title || "집 전체 통대여", body: settings.feature1_body || settings.tagline || "도착하시면 집 안 어느 방에서든 자유롭게 머무실 수 있습니다." },
+            { show: settings.feature2_visible !== false, icon: <Users className="w-5 h-5" />, title: settings.feature2_title || `최대 ${settings.max_guests}명`, body: settings.feature2_body || "인원 단위 예약으로 가족·친구 모임에 딱 맞습니다." },
+            { show: settings.feature3_visible !== false, icon: <Banknote className="w-5 h-5" />, title: settings.feature3_title || "간편 입금 결제", body: settings.feature3_body || "카카오페이·토스로 바로 송금하세요. 카드 결제 없음." },
+          ] as const).filter((f) => f.show).filter((f) => f.show).map((f) => (
             <div key={f.title} className="card-surface p-5">
               <div className="w-10 h-10 rounded-xl bg-primary-soft text-primary flex items-center justify-center">{f.icon}</div>
               <div className="mt-3 font-extrabold">{f.title}</div>
