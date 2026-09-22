@@ -94,8 +94,8 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         <h3 className="font-black">메인 히어로 (최상단 배너)</h3>
         <div>
           <div className="flex items-center justify-between gap-3">
-            <label className="label !mb-0">배지 문구 <span className="text-muted-foreground font-normal ml-1">🏠 아이콘 우측 텍스트</span></label>
-            <MiniToggle checked={form.hero_badge_visible !== false} onChange={(v) => set("hero_badge_visible", v)} label="배지 표시" />
+            <label className="label">배지 문구 <span className="text-muted-foreground font-normal ml-1">🏠 아이콘 우측 텍스트</span></label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold shrink-0"><input type="checkbox" checked={form.hero_badge_visible !== false} onChange={(e) => set("hero_badge_visible", e.target.checked)} className="w-4 h-4 accent-primary" aria-label="배지 표시" />표시</label>
           </div>
           <input className="input" value={form.hero_badge_text || ""} maxLength={40}
             onChange={(e) => set("hero_badge_text", e.target.value)} placeholder="집 전체 대여 · 방 선택 없이 자유롭게" />
@@ -300,8 +300,8 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         </div>
         <div>
           <div className="flex items-center justify-between gap-3">
-            <label className="label !mb-0">한 줄 소개</label>
-            <MiniToggle checked={form.tagline_visible === true} onChange={(v) => set("tagline_visible", v)} label="한 줄 소개 메인 표시" />
+            <label className="label">한 줄 소개</label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold shrink-0"><input type="checkbox" checked={form.tagline_visible === true} onChange={(e) => set("tagline_visible", e.target.checked)} className="w-4 h-4 accent-primary" aria-label="한 줄 소개 메인 표시" />표시</label>
           </div>
           <input className="input" value={form.tagline} onChange={(e) => set("tagline", e.target.value)} />
         </div>
@@ -341,13 +341,3 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
   );
 }
 
-/** 소형 토글 — 라벨 행 우측 끝 배치용 (웹/모바일 공통) */
-function MiniToggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button type="button" role="switch" aria-checked={checked} aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${checked ? "bg-primary" : "bg-muted border border-border"}`}>
-      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${checked ? "left-[18px]" : "left-0.5"}`} />
-    </button>
-  );
-}
