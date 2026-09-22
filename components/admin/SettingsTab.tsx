@@ -90,8 +90,29 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
   }
 
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="max-w-6xl space-y-4">
       <h2 className="font-black">사이트 설정</h2>
+
+      {/* 숙소 소개 */}
+      <div className="card-surface p-5 space-y-4">
+        <h3 className="font-bold text-sm text-muted-foreground">숙소 소개</h3>
+        <div>
+          <label className="label">숙소 이름</label>
+          <input className="input" value={form.pension_name} onChange={(e) => set("pension_name", e.target.value)} />
+        </div>
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <label className="label">한 줄 소개</label>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold shrink-0"><input type="checkbox" checked={form.tagline_visible === true} onChange={(e) => set("tagline_visible", e.target.checked)} className="w-4 h-4 accent-primary" aria-label="한 줄 소개 메인 표시" />표시</label>
+          </div>
+          <input className="input" value={form.tagline} onChange={(e) => set("tagline", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">상세 설명</label>
+          <textarea className="input min-h-[100px] resize-none" value={form.description}
+            onChange={(e) => set("description", e.target.value)} />
+        </div>
+      </div>
 
       {/* 히어로 배지 + 한줄소개 표시 (메인 최상단 순서) */}
       <div className="card-surface p-5 space-y-4">
@@ -106,37 +127,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         </div>
       </div>
 
-
-      {/* 보안 — 비밀번호 변경 */}
-      <div className="card-surface p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <h3 className="font-black">보안 — 비밀번호 변경</h3>
-        </div>
-        <p className="text-xs text-muted-foreground">변경 즉시 반영됩니다 (재배포 불필요). 환경변수 ADMIN_PASSWORD는 긴급 복구용으로 유지됩니다.</p>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <div><label className="label">현재 비밀번호</label><input type="password" className="input" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} /></div>
-          <div><label className="label">새 비밀번호 (8자 이상)</label><input type="password" className="input" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></div>
-          <div><label className="label">새 비밀번호 확인</label><input type="password" className="input" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} /></div>
-        </div>
-        {pwMsg && <p className={`text-xs font-bold ${pwOk ? "text-success" : "text-danger"}`}>{pwMsg}</p>}
-        <button type="button" className="btn-primary !py-2.5 !px-5 text-sm"
-          disabled={pwBusy || !pw.cur || !pw.next}
-          onClick={async () => {
-            if (pw.next !== pw.confirm) { setPwOk(false); setPwMsg("새 비밀번호가 일치하지 않습니다."); return; }
-            setPwBusy(true); setPwMsg("");
-            try {
-              const res = await fetch("/api/admin/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ current: pw.cur, next: pw.next }) });
-              const d = await res.json();
-              if (!res.ok) throw new Error(d.error || "변경 실패");
-              setPwOk(true); setPwMsg("✓ 비밀번호가 변경되었습니다 — 다음 로그인부터 적용됩니다.");
-              setPw({ cur: "", next: "", confirm: "" });
-            } catch (e) { setPwOk(false); setPwMsg(e instanceof Error ? e.message : "변경 중 오류가 발생했습니다."); }
-            finally { setPwBusy(false); }
-          }}>
-          {pwBusy ? "저장 중…" : "비밀번호 변경"}
-        </button>
-      </div>
 
       {/* 예약 일시중지 — 안내문·재개일 (토글은 대시보드 헤더 아래에 있음) */}
       <div className="card-surface p-5 space-y-3">
@@ -327,27 +317,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         </div>
       </div>
 
-      {/* 숙소 소개 */}
-      <div className="card-surface p-5 space-y-4">
-        <h3 className="font-bold text-sm text-muted-foreground">숙소 소개</h3>
-        <div>
-          <label className="label">숙소 이름</label>
-          <input className="input" value={form.pension_name} onChange={(e) => set("pension_name", e.target.value)} />
-        </div>
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <label className="label">한 줄 소개</label>
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold shrink-0"><input type="checkbox" checked={form.tagline_visible === true} onChange={(e) => set("tagline_visible", e.target.checked)} className="w-4 h-4 accent-primary" aria-label="한 줄 소개 메인 표시" />표시</label>
-          </div>
-          <input className="input" value={form.tagline} onChange={(e) => set("tagline", e.target.value)} />
-        </div>
-        <div>
-          <label className="label">상세 설명</label>
-          <textarea className="input min-h-[100px] resize-none" value={form.description}
-            onChange={(e) => set("description", e.target.value)} />
-        </div>
-      </div>
-
       {/* 입금 계좌 */}
       <div className="card-surface p-5 space-y-4">
         <h3 className="font-bold text-sm text-muted-foreground">입금 계좌 (카카오페이/토스 송금 버튼에 사용)</h3>
@@ -366,6 +335,38 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
           <input className="input" value={form.account_holder} onChange={(e) => set("account_holder", e.target.value)} />
         </div>
       </div>
+
+      {/* 보안 — 비밀번호 변경 */}
+      <div className="card-surface p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <h3 className="font-black">보안 — 비밀번호 변경</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">변경 즉시 반영됩니다 (재배포 불필요). 환경변수 ADMIN_PASSWORD는 긴급 복구용으로 유지됩니다.</p>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div><label className="label">현재 비밀번호</label><input type="password" className="input" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} /></div>
+          <div><label className="label">새 비밀번호 (8자 이상)</label><input type="password" className="input" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></div>
+          <div><label className="label">새 비밀번호 확인</label><input type="password" className="input" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} /></div>
+        </div>
+        {pwMsg && <p className={`text-xs font-bold ${pwOk ? "text-success" : "text-danger"}`}>{pwMsg}</p>}
+        <button type="button" className="btn-primary !py-2.5 !px-5 text-sm"
+          disabled={pwBusy || !pw.cur || !pw.next}
+          onClick={async () => {
+            if (pw.next !== pw.confirm) { setPwOk(false); setPwMsg("새 비밀번호가 일치하지 않습니다."); return; }
+            setPwBusy(true); setPwMsg("");
+            try {
+              const res = await fetch("/api/admin/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ current: pw.cur, next: pw.next }) });
+              const d = await res.json();
+              if (!res.ok) throw new Error(d.error || "변경 실패");
+              setPwOk(true); setPwMsg("✓ 비밀번호가 변경되었습니다 — 다음 로그인부터 적용됩니다.");
+              setPw({ cur: "", next: "", confirm: "" });
+            } catch (e) { setPwOk(false); setPwMsg(e instanceof Error ? e.message : "변경 중 오류가 발생했습니다."); }
+            finally { setPwBusy(false); }
+          }}>
+          {pwBusy ? "저장 중…" : "비밀번호 변경"}
+        </button>
+      </div>
+
 
       {message && (
         <p className={`text-sm font-semibold ${message.ok ? "text-success" : "text-danger"}`}>{message.text}</p>
