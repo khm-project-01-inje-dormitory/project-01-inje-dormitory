@@ -14,9 +14,9 @@ export const fetchCache = "force-no-store";
  * 총 20장 한도는 서버에서 강제 (클라이언트 우회 무의미)
  */
 const PHOTO_POLICY = {
-  total: 20,
-  hero: { max: 4, maxBytes: 5 * 1024 * 1024, label: "대문" },
-  gallery: { max: 16, maxBytes: 2 * 1024 * 1024 + 512 * 1024, label: "소개" },
+  total: 38,
+  hero: { max: 8, maxBytes: 5 * 1024 * 1024, label: "대문" },
+  gallery: { max: 30, maxBytes: 2 * 1024 * 1024 + 512 * 1024, label: "소개" },
 } as const;
 
 /** 공개: 사진 목록 */

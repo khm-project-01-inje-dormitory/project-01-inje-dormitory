@@ -6,8 +6,8 @@ import type { Photo } from "@/types";
 
 /** 대문/소개 사진 정책 — 서버(app/api/photos)와 동일한 값 유지 */
 const POLICY = {
-  hero: { max: 4, label: "대문", desc: "최대 변 2560px · 고품질(압축 적음) · 파일당 5MB — 4장을 올려두고 언제든 대문 1장을 골라 바꿀 수 있어요 (예: 봄/여름/가을/겨울)" },
-  gallery: { max: 16, label: "소개", desc: "최대 변 1600px · 웹 최적화 압축 · 파일당 2.5MB" },
+  hero: { max: 8, label: "대문", desc: "최대 변 2560px · 고품질(압축 적음) · 파일당 5MB — 8장을 올려두고 언제든 대문 1장을 골라 바꿀 수 있어요 (예: 봄/여름/가을/겨울)" },
+  gallery: { max: 30, label: "소개", desc: "최대 변 1600px · 웹 최적화 압축 · 파일당 2.5MB" },
 } as const;
 
 /** 갤러리 관리 — 대문(4장, 표시 1장 선택)/소개 두 섹터 (총 20장, 서버 강제) */
@@ -100,7 +100,7 @@ export default function GalleryTab() {
 
   return (
     <div className="space-y-5">
-      <h2 className="font-black">펜션 사진 관리 <span className="text-muted-foreground font-medium text-sm">(총 {photos.length}/20장 · 대문 {heroPhotos.length}/4 · 소개 {galleryPhotos.length}/16)</span></h2>
+      <h2 className="font-black">펜션 사진 관리 <span className="text-muted-foreground font-medium text-sm">(총 {photos.length}/38장 · 대문 {heroPhotos.length}/8 · 소개 {galleryPhotos.length}/30)</span></h2>
       {error && <p className="text-sm font-semibold text-danger">{error}</p>}
 
       {/* ── 대문 사진 ── */}
