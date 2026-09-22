@@ -137,9 +137,10 @@ export default async function Home() {
           <div className="card-surface p-6">
             <h3 className="font-black mb-3">이용 시간</h3>
             <ul className="space-y-2 text-sm">
-              <li className="flex justify-between"><span className="text-muted-foreground">체크인</span><b>{settings.check_in_time}</b></li>
-              <li className="flex justify-between"><span className="text-muted-foreground">체크아웃</span><b>{settings.check_out_time}</b></li>
-              <li className="flex justify-between"><span className="text-muted-foreground">문의 전화</span><b className="tabular-nums">{settings.contact_phone || "등록 전"}</b></li>
+              {/* 라벨-값 인접 좌측 정렬: 좌우 쏠림 제거 (모바일·PC 동일 패턴) */}
+              <li className="flex items-baseline gap-3"><span className="w-16 shrink-0 text-muted-foreground">체크인</span><b className="tabular-nums">{settings.check_in_time}</b></li>
+              <li className="flex items-baseline gap-3"><span className="w-16 shrink-0 text-muted-foreground">체크아웃</span><b className="tabular-nums">{settings.check_out_time}</b></li>
+              <li className="flex items-baseline gap-3"><span className="w-16 shrink-0 text-muted-foreground">문의 전화</span><b className="tabular-nums">{settings.contact_phone || "등록 전"}</b></li>
             </ul>
           </div>
           <div className="card-surface p-6">
@@ -166,22 +167,23 @@ export default async function Home() {
               <MapPin className="w-4 h-4 text-primary" /> 오시는 길
             </h3>
             <div className="space-y-2.5 text-sm">
+              {/* 라벨-값 인접 좌측 정렬: 긴 주소도 왼쪽 기준 자연 줄바꿈 (break-keep) */}
               {settings.address && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-muted-foreground shrink-0">주소</span>
-                  <span className="font-semibold text-right">{settings.address}</span>
+                <div className="flex items-start gap-3">
+                  <span className="w-16 shrink-0 text-muted-foreground">주소</span>
+                  <span className="font-semibold break-keep">{settings.address}</span>
                 </div>
               )}
               {settings.parking_info && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-muted-foreground shrink-0 flex items-center gap-1"><CarFront className="w-3.5 h-3.5" />주차</span>
-                  <span className="font-semibold text-right">{settings.parking_info}</span>
+                <div className="flex items-start gap-3">
+                  <span className="w-16 shrink-0 text-muted-foreground flex items-center gap-1"><CarFront className="w-3.5 h-3.5" />주차</span>
+                  <span className="font-semibold break-keep">{settings.parking_info}</span>
                 </div>
               )}
               {settings.arrival_info && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-muted-foreground shrink-0 flex items-center gap-1"><Footprints className="w-3.5 h-3.5" />안내</span>
-                  <span className="font-semibold text-right">{settings.arrival_info}</span>
+                <div className="flex items-start gap-3">
+                  <span className="w-16 shrink-0 text-muted-foreground flex items-center gap-1"><Footprints className="w-3.5 h-3.5" />안내</span>
+                  <span className="font-semibold break-keep">{settings.arrival_info}</span>
                 </div>
               )}
             </div>
