@@ -93,21 +93,13 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
       <div className="card-surface p-5 space-y-4">
         <h3 className="font-black">메인 히어로 (최상단 배너)</h3>
         <div>
-          <label className="label">배지 문구 <span className="text-muted-foreground font-normal ml-1">🏠 아이콘 우측 텍스트</span></label>
+          <div className="flex items-center justify-between gap-3">
+            <label className="label !mb-0">배지 문구 <span className="text-muted-foreground font-normal ml-1">🏠 아이콘 우측 텍스트</span></label>
+            <MiniToggle checked={form.hero_badge_visible !== false} onChange={(v) => set("hero_badge_visible", v)} label="배지 표시" />
+          </div>
           <input className="input" value={form.hero_badge_text || ""} maxLength={40}
             onChange={(e) => set("hero_badge_text", e.target.value)} placeholder="집 전체 대여 · 방 선택 없이 자유롭게" />
         </div>
-        <label className="flex items-center justify-between gap-4 cursor-pointer rounded-xl border border-border px-4 py-3.5 hover:bg-muted/60 transition-colors">
-          <span>
-            <b className="text-sm block">한 줄 소개 표시</b>
-            <span className="text-xs text-muted-foreground">켜면 펜션 이름 아래 한 줄 소개가 나타납니다. (끄면 현재처럼 숨김)</span>
-          </span>
-          <input type="checkbox" className="sr-only" checked={form.tagline_visible === true}
-            onChange={(e) => set("tagline_visible", e.target.checked)} />
-          <span className={`w-11 h-6 rounded-full relative transition-colors shrink-0 ${form.tagline_visible ? "bg-primary" : "bg-muted border border-border"}`}>
-            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${form.tagline_visible ? "left-[22px]" : "left-0.5"}`} />
-          </span>
-        </label>
       </div>
 
       {/* 예약 일시중지 — 안내문·재개일 (토글은 대시보드 헤더 아래에 있음) */}
@@ -125,6 +117,38 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
           <input type="date" className="input max-w-[180px]" value={form.booking_resume_date || ""}
             onChange={(e) => set("booking_resume_date", e.target.value)} />
         </div>
+      </div>
+
+      {/* 메인 소개 카드 편집/표시 (3개) */}
+      <div className="card-surface p-5 space-y-4">
+        <div>
+          <h3 className="font-black">메인 소개 카드</h3>
+          <p className="text-xs text-muted-foreground mt-1">홈 화면 소개 섹션의 카드 3개 — 제목·내용을 바꾸거나 표시를 끌 수 있습니다.</p>
+        </div>
+        {([1, 2, 3] as const).map((n) => {
+          const tKey = `feature${n}_title` as keyof Settings;
+          const bKey = `feature${n}_body` as keyof Settings;
+          const vKey = `feature${n}_visible` as keyof Settings;
+          const title = String(form[tKey] ?? "");
+          const body = String(form[bKey] ?? "");
+          const visible = form[vKey] !== false;
+          return (
+            <div key={n} className="rounded-xl border border-border p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <b className="text-sm">카드 {n}</b>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
+                  <input type="checkbox" checked={visible} onChange={(e) => set(vKey, e.target.checked as never)} className="w-4 h-4 accent-[hsl(154,76%,22%)]" />
+                  표시
+                </label>
+              </div>
+              <input className="input" placeholder="제목" value={title} maxLength={30}
+                onChange={(e) => set(tKey, e.target.value as never)} disabled={!visible} />
+              <textarea className="input min-h-[56px] resize-none" placeholder="내용" value={body} maxLength={120}
+                onChange={(e) => set(bKey, e.target.value as never)} disabled={!visible} />
+            </div>
+          );
+        })}
+        <p className="text-xs text-muted-foreground">카드 1 내용을 비우면 한줄소개(태그라인)가 자동으로 들어갑니다.</p>
       </div>
 
       {/* 요금 · 수용 인원 · 시간 */}
@@ -182,38 +206,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
               onChange={(e) => set("check_out_time", e.target.value)} />
           </div>
         </div>
-      </div>
-
-      {/* 메인 소개 카드 편집/표시 (3개) */}
-      <div className="card-surface p-5 space-y-4">
-        <div>
-          <h3 className="font-black">메인 소개 카드</h3>
-          <p className="text-xs text-muted-foreground mt-1">홈 화면 소개 섹션의 카드 3개 — 제목·내용을 바꾸거나 표시를 끌 수 있습니다.</p>
-        </div>
-        {([1, 2, 3] as const).map((n) => {
-          const tKey = `feature${n}_title` as keyof Settings;
-          const bKey = `feature${n}_body` as keyof Settings;
-          const vKey = `feature${n}_visible` as keyof Settings;
-          const title = String(form[tKey] ?? "");
-          const body = String(form[bKey] ?? "");
-          const visible = form[vKey] !== false;
-          return (
-            <div key={n} className="rounded-xl border border-border p-4 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <b className="text-sm">카드 {n}</b>
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
-                  <input type="checkbox" checked={visible} onChange={(e) => set(vKey, e.target.checked as never)} className="w-4 h-4 accent-[hsl(154,76%,22%)]" />
-                  표시
-                </label>
-              </div>
-              <input className="input" placeholder="제목" value={title} maxLength={30}
-                onChange={(e) => set(tKey, e.target.value as never)} disabled={!visible} />
-              <textarea className="input min-h-[56px] resize-none" placeholder="내용" value={body} maxLength={120}
-                onChange={(e) => set(bKey, e.target.value as never)} disabled={!visible} />
-            </div>
-          );
-        })}
-        <p className="text-xs text-muted-foreground">카드 1 내용을 비우면 한줄소개(태그라인)가 자동으로 들어갑니다.</p>
       </div>
 
       {/* 휴무일 관리 */}
@@ -303,11 +295,14 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
       <div className="card-surface p-5 space-y-4">
         <h3 className="font-bold text-sm text-muted-foreground">숙소 소개</h3>
         <div>
-          <label className="label">펜션 이름</label>
+          <label className="label">숙소 이름</label>
           <input className="input" value={form.pension_name} onChange={(e) => set("pension_name", e.target.value)} />
         </div>
         <div>
-          <label className="label">한 줄 소개</label>
+          <div className="flex items-center justify-between gap-3">
+            <label className="label !mb-0">한 줄 소개</label>
+            <MiniToggle checked={form.tagline_visible === true} onChange={(v) => set("tagline_visible", v)} label="한 줄 소개 메인 표시" />
+          </div>
           <input className="input" value={form.tagline} onChange={(e) => set("tagline", e.target.value)} />
         </div>
         <div>
@@ -343,5 +338,16 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-4 h-4" />} 설정 저장
       </button>
     </div>
+  );
+}
+
+/** 소형 토글 — 라벨 행 우측 끝 배치용 (웹/모바일 공통) */
+function MiniToggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button type="button" role="switch" aria-checked={checked} aria-label={label}
+      onClick={() => onChange(!checked)}
+      className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${checked ? "bg-primary" : "bg-muted border border-border"}`}>
+      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${checked ? "left-[18px]" : "left-0.5"}`} />
+    </button>
   );
 }

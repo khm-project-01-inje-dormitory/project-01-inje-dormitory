@@ -48,9 +48,11 @@ export default async function Home() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
         <div className="relative max-w-5xl mx-auto w-full px-5 pb-12 pt-24 text-white">
-          <span className="badge bg-white/15 backdrop-blur text-white border border-white/20">
-            <HomeIcon className="w-3.5 h-3.5" /> {settings.hero_badge_text || "집 전체 대여 · 방 선택 없이 자유롭게"}
-          </span>
+          {settings.hero_badge_visible !== false && (
+            <span className="badge bg-white/15 backdrop-blur text-white border border-white/20">
+              <HomeIcon className="w-3.5 h-3.5" /> {settings.hero_badge_text || "집 전체 대여 · 방 선택 없이 자유롭게"}
+            </span>
+          )}
           <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
             {settings.pension_name}
           </h1>

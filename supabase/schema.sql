@@ -147,6 +147,7 @@ alter table settings add column if not exists feature3_visible boolean not null 
 
 -- 업그레이드: 히어로 배지 문구 + 한줄소개 표시 토글
 alter table settings add column if not exists hero_badge_text text not null default '집 전체 대여 · 방 선택 없이 자유롭게';
+alter table settings add column if not exists hero_badge_visible boolean not null default true;
 alter table settings add column if not exists tagline_visible boolean not null default false;
 
 -- 업그레이드: 예약 일시중지 (토글 + 안내문 + 재개 예정일 자동 복귀)

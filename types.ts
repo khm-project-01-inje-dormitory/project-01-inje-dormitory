@@ -76,6 +76,7 @@ export interface Settings {
   booking_resume_date: string;
   /** 히어로 배지 문구 (집 아이콘 우측 텍스트) */
   hero_badge_text: string;
+  hero_badge_visible: boolean;
   /** 한줄소개 표시 토글 — 켜면 제목 아래에 표시 */
   tagline_visible: boolean;
   /** 메인 소개 카드 3개 — 관리자 편집/숨김 (빈 값이면 기본 문구 사용) */

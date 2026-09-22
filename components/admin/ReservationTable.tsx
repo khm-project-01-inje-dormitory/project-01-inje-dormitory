@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X } from "lucide-react";
+import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
@@ -109,6 +109,22 @@ export default function ReservationTable({
 
   return (
     <div className="space-y-3">
+      {/* 상태별 카운터 칩 — 현재 상태 한눈에 */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        {([["pending", "bg-amber-50 text-amber-700 border-amber-200"],
+           ["confirmed", "bg-sky-50 text-sky-700 border-sky-200"],
+           ["completed", "bg-emerald-50 text-emerald-700 border-emerald-200"]] as const).map(([k, cls]) => (
+          <span key={k} className={`badge border ${cls}`}>
+            {STATUS_LABEL[k]} {rows.filter((r) => r.status === k).length}건
+          </span>
+        ))}
+        {rows.some((r) => r.status === "cancelled") && (
+          <span className="badge border bg-rose-50 text-rose-700 border-rose-200">
+            취소 {rows.filter((r) => r.status === "cancelled").length}건
+          </span>
+        )}
+        <span className="badge border border-border bg-card text-muted-foreground ml-auto">전체 {rows.length}건</span>
+      </div>
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="font-black">{mode === "pending" ? "입금 대기 예약" : `전체 예약 ${rows.length}건`}</h2>
         {mode === "all" && (
@@ -223,7 +239,8 @@ export default function ReservationTable({
                   </>
                 )}
               </div>
-{editTarget?.id === r.id && <EditReservationDialog reservation={r} onClose={() => setEditTarget(null)} onSaved={load} />}
+<ProgressTrack status={r.status} />
+            {editTarget?.id === r.id && <EditReservationDialog reservation={r} onClose={() => setEditTarget(null)} onSaved={load} />}
             </div>
           ))}
         </div>
@@ -235,4 +252,51 @@ export default function ReservationTable({
 function shiftDate(days: number): string {
   const d = new Date(Date.now() + 9 * 3600000 + days * 86400000);
   return d.toISOString().slice(0, 10);
+}
+
+/** 예약 진행 단계 — 입금대기 → 예약확정 → 투숙완료 (취소는 진행 중단 표시) */
+const STAGES: { key: ReservationStatus; label: string }[] = [
+  { key: "pending", label: "입금대기" },
+  { key: "confirmed", label: "예약확정" },
+  { key: "completed", label: "투숙완료" },
+];
+
+function ProgressTrack({ status }: { status: ReservationStatus }) {
+  if (status === "cancelled") {
+    return (
+      <div className="mt-4 pt-3 border-t border-border" aria-label="취소된 예약">
+        <div className="relative h-1.5 rounded-full bg-muted">
+          <span className="absolute top-1/2 -translate-y-1/2 left-0 w-3 h-3 rounded-full bg-destructive ring-2 ring-background" />
+        </div>
+        <div className="mt-1.5 flex items-center gap-1 text-[10px] font-semibold text-destructive">
+          <XCircle className="w-3 h-3 shrink-0" /> 취소 — 진행 중단
+        </div>
+      </div>
+    );
+  }
+  const idx = STAGES.findIndex((s) => s.key === status);
+  const pct = (idx / (STAGES.length - 1)) * 100;
+  const fill = idx === 0 ? "bg-amber-400" : idx === 1 ? "bg-primary" : "bg-emerald-500";
+  const tone = idx === 0 ? "text-amber-500" : idx === 1 ? "text-primary" : "text-emerald-600";
+  return (
+    <div className="mt-4 pt-3 border-t border-border" aria-label={`예약 진행: ${STATUS_LABEL[status]}`}>
+      <div className="relative h-1.5 rounded-full bg-muted">
+        <div className={`absolute inset-y-0 left-0 rounded-full ${fill} transition-all duration-500 ease-out`} style={{ width: `${pct}%` }} />
+        {STAGES.map((s, i) => (
+          <span key={s.key}
+            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full transition-colors duration-500 ${i <= idx ? `${fill} ring-2 ring-background` : "bg-muted border border-border"}`}
+            style={{ left: `${(i / (STAGES.length - 1)) * 100}%` }} />
+        ))}
+      </div>
+      <div className="relative mt-1.5 h-3">
+        {STAGES.map((s, i) => (
+          <span key={s.key}
+            className={`absolute -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold ${i <= idx ? tone : "text-muted-foreground/50"}`}
+            style={{ left: `${(i / (STAGES.length - 1)) * 100}%` }}>
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
