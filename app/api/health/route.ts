@@ -7,6 +7,8 @@ import { isDemoMode, IS_VERCEL, SUPABASE_URL, SUPABASE_ANON, SUPABASE_SERVICE } 
  * mode가 "demo"면 env 중 false인 변수가 원인. 전부 true인데 demo면 배포가 환경변수 등록 이전 빌드.
  */
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export async function GET() {
   return NextResponse.json({

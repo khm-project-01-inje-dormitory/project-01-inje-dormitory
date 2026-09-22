@@ -37,10 +37,16 @@ const SETTINGS_SEED: Partial<Settings> = {
 
 export const supabaseStore = {
   async getSettings(): Promise<Settings> {
-    const { data } = await db().from("settings").select("*").eq("id", 1).maybeSingle();
+    // ⚠ error를 절대 무시하지 않는다 — 무시하면 조회 실패가 "행 없음"으로 위장해
+    // 아래 시드 upsert가 기존 설정(요금·인원·계좌)을 기본값으로 덮어쓰는 사고가 난다.
+    const { data, error } = await db().from("settings").select("*").eq("id", 1).maybeSingle();
+    if (error) throw new Error(`설정 조회 실패: ${error.message}`);
     if (data) return data as Settings;
-    await db().from("settings").upsert(SETTINGS_SEED);
-    return SETTINGS_SEED as Settings;
+    // 행이 정말 없을 때만 최초 1회 시드 (기존 값 덮어쓰기 없음)
+    const { error: seedErr } = await db().from("settings").upsert(SETTINGS_SEED, { onConflict: "id", ignoreDuplicates: true });
+    if (seedErr) throw new Error(`설정 초기화 실패: ${seedErr.message}`);
+    const { data: seeded } = await db().from("settings").select("*").eq("id", 1).maybeSingle();
+    return (seeded ?? SETTINGS_SEED) as Settings;
   },
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {
     const { data, error } = await db()
