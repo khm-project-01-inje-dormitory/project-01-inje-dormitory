@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle } from "lucide-react";
+import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
@@ -32,9 +32,21 @@ export default function ReservationTable({
   const [rows, setRows] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [q, setQ] = useState("");
+  const [q, setQRaw] = useState(() => loadPref("q", ""));
   const [editTarget, setEditTarget] = useState<Reservation | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  function loadPref<T>(key: string, fallback: T): T {
+    if (typeof window === "undefined") return fallback;
+    try { return (window.sessionStorage.getItem("rt_" + key) as T) ?? fallback; } catch { return fallback; }
+  }
+  const savePref = (key: string, v: string) => { try { window.sessionStorage.setItem("rt_" + key, v); } catch {} };
+  const [statusFilter, setStatusFilterRaw] = useState<"all" | ReservationStatus>(() => loadPref("status", "all" as "all" | ReservationStatus));
+  const [sortKey, setSortKeyRaw] = useState<"newest" | "checkin" | "amount_desc" | "amount_asc">(() => loadPref("sort", "newest" as "newest" | "checkin" | "amount_desc" | "amount_asc"));
+  const [visible, setVisibleRaw] = useState(20);
+
+  const setStatusFilter = (v: "all" | ReservationStatus) => { setStatusFilterRaw(v); savePref("status", v); };
+  const setSortKey = (v: typeof sortKey) => { setSortKeyRaw(v); savePref("sort", v); setVisibleRaw(20); };
+  const setQ = (v: string) => { setQRaw(v); savePref("q", v); };
 
   // CSV 내보내기 기간 (기본: 3개월 전 ~ 6개월 후)
   const [expFrom, setExpFrom] = useState(shiftDate(-90));
@@ -96,12 +108,20 @@ export default function ReservationTable({
   }
 
   const filtered = useMemo(() => {
+    let list = statusFilter === "all" ? rows : rows.filter((r) => r.status === statusFilter);
     const t = q.trim().toLowerCase();
-    if (!t) return rows;
-    return rows.filter((r) =>
+    if (t) list = list.filter((r) =>
       [r.guest_name, r.phone, r.code, r.depositor].some((s) => s.toLowerCase().includes(t))
     );
-  }, [rows, q]);
+    const by: Record<typeof sortKey, (a: Reservation, b: Reservation) => number> = {
+      newest: (a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""),
+      checkin: (a, b) => (a.check_in + a.check_out).localeCompare(b.check_in + b.check_out),
+      amount_desc: (a, b) => b.total_amount - a.total_amount,
+      amount_asc: (a, b) => a.total_amount - b.total_amount,
+    };
+    return [...list].sort(by[sortKey]);
+  }, [rows, q, statusFilter, sortKey]);
+  const shown = filtered.slice(0, visible);
 
   if (loading) {
     return <div className="card-surface p-10 flex items-center justify-center text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin" /></div>;
@@ -109,24 +129,49 @@ export default function ReservationTable({
 
   return (
     <div className="space-y-3">
-      {/* 상태별 카운터 칩 — 현재 상태 한눈에 */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        {([["pending", "bg-amber-50 text-amber-700 border-amber-200"],
-           ["confirmed", "bg-sky-50 text-sky-700 border-sky-200"],
-           ["completed", "bg-emerald-50 text-emerald-700 border-emerald-200"]] as const).map(([k, cls]) => (
-          <span key={k} className={`badge border ${cls}`}>
-            {STATUS_LABEL[k]} {rows.filter((r) => r.status === k).length}건
-          </span>
-        ))}
-        {rows.some((r) => r.status === "cancelled") && (
-          <span className="badge border bg-rose-50 text-rose-700 border-rose-200">
-            취소 {rows.filter((r) => r.status === "cancelled").length}건
-          </span>
-        )}
-        <span className="badge border border-border bg-card text-muted-foreground ml-auto">전체 {rows.length}건</span>
+      {/* 상태별 카운터 칩 — 눌러서 필터 (활성 칩 강조) */}
+      <div className="flex flex-wrap items-center gap-2 mb-4" role="group" aria-label="상태 필터">
+        <button type="button" onClick={() => setStatusFilter("all")}
+          aria-pressed={statusFilter === "all"}
+          className={`badge border transition-all duration-200 select-none cursor-pointer hover:scale-[1.04] hover:shadow-sm active:scale-95 ${
+            statusFilter === "all"
+              ? "border-border bg-foreground text-background shadow-sm"
+              : "border-border bg-card text-muted-foreground"}`}>
+          전체 {rows.length}건
+        </button>
+        {([["pending", "bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400 border-amber-300 text-amber-950 shadow-sm ring-2 ring-amber-200"],
+           ["confirmed", "bg-sky-50 text-sky-700 border-sky-200", "bg-sky-500 border-sky-400 text-white shadow-sm ring-2 ring-sky-200"],
+           ["completed", "bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-500 border-emerald-400 text-white shadow-sm ring-2 ring-emerald-200"],
+           ["cancelled", "bg-rose-50 text-rose-700 border-rose-200", "bg-rose-500 border-rose-400 text-white shadow-sm ring-2 ring-rose-200"]] as const).map(([k, idle, active]) => {
+          const count = rows.filter((r) => r.status === k).length;
+          const on = statusFilter === k;
+          return (
+            <button key={k} type="button" onClick={() => setStatusFilter(on ? "all" : k)}
+              aria-pressed={on} disabled={!on && count === 0}
+              title={on ? "필터 해제" : `${STATUS_LABEL[k]}만 보기`}
+              className={`badge border transition-all duration-200 select-none cursor-pointer hover:scale-[1.04] hover:shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+                on ? active : idle}`}>
+              {STATUS_LABEL[k]} {count}건{on && count > 0 ? " ✓" : ""}
+            </button>
+          );
+        })}
       </div>
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="font-black">{mode === "pending" ? "입금 대기 예약" : `전체 예약 ${rows.length}건`}</h2>
+        {mode === "all" && (
+          <label className="relative inline-flex items-center">
+            <ArrowUpDown className="w-3.5 h-3.5 absolute left-2.5 pointer-events-none text-muted-foreground" />
+            <select value={sortKey} onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              aria-label="정렬 기준"
+              className="appearance-none input !py-2 !pl-8 !pr-8 text-sm cursor-pointer bg-card">
+              <option value="newest">최근 신청순</option>
+              <option value="checkin">투숙 임박순</option>
+              <option value="amount_desc">금액 높은순</option>
+              <option value="amount_asc">금액 낮은순</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 pointer-events-none text-muted-foreground" />
+          </label>
+        )}
         {mode === "all" && (
           <>
             <div className="relative flex-1 min-w-[180px] max-w-xs">
@@ -147,16 +192,22 @@ export default function ReservationTable({
 
       {filtered.length === 0 ? (
         <div className="card-surface p-10 text-center text-muted-foreground">
-          {mode === "pending" ? "입금 대기 중인 예약이 없습니다. 👍" : "예약이 없습니다."}
+          {mode === "pending" ? "입금 대기 중인 예약이 없습니다. 👍" : statusFilter !== "all" ? `${STATUS_LABEL[statusFilter]} 예약이 없습니다.` : "예약이 없습니다."}
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((r) => (
+          {shown.map((r) => (
             <div key={r.id} className="card-surface p-4 sm:px-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <b className="text-[15px]">{r.guest_name}</b>
+                    {(sortKey === "checkin" || true) && r.check_in === todayKST() && r.status !== "cancelled" && r.status !== "completed" && (
+                      <span className="badge bg-rose-500 text-white border border-rose-400 !py-0.5 !px-2 text-[10px]">오늘 체크인</span>
+                    )}
+                    {r.check_in === shiftDate(1) && r.status !== "cancelled" && r.status !== "completed" && (
+                      <span className="badge bg-amber-100 text-amber-800 border border-amber-300 !py-0.5 !px-2 text-[10px]">내일 체크인</span>
+                    )}
                     <span className="text-xs text-muted-foreground">{r.depositor !== r.guest_name ? `입금자: ${r.depositor}` : ""}</span>
                     <span className={`badge ${STATUS_STYLE[r.status]}`}>{STATUS_LABEL[r.status]}</span>
                     {r.status === "cancelled" && r.refund_status !== "none" && (
@@ -243,6 +294,14 @@ export default function ReservationTable({
             {editTarget?.id === r.id && <EditReservationDialog reservation={r} onClose={() => setEditTarget(null)} onSaved={load} />}
             </div>
           ))}
+        </div>
+      )}
+      {filtered.length > shown.length && (
+        <div className="flex flex-col items-center gap-1.5 mt-4 mb-2">
+          <button type="button" onClick={() => setVisibleRaw((v) => v + 20)} className="btn-outline !py-2.5 !px-6 text-sm">
+            더 보기 <span className="text-muted-foreground font-normal">(남은 {filtered.length - shown.length}건)</span>
+          </button>
+          <p className="text-xs text-muted-foreground">총 {filtered.length}건 중 {shown.length}건 표시</p>
         </div>
       )}
     </div>
