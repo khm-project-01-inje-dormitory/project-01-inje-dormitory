@@ -92,6 +92,14 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
 
   return (
     <div className="max-w-6xl space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-black">사이트 설정</h2>
+        <button type="button" onClick={() => setPwOpen(true)}
+          className="btn-outline !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5 shrink-0 hover:scale-[1.03] active:scale-95 transition-transform">
+          <ShieldCheck className="w-3.5 h-3.5" /> 비밀번호 변경
+        </button>
+      </div>
+
       {/* 예약 마감 정책 */}
       <div className="card-surface p-5">
         <h3 className="font-black mb-1">예약 자동 마감</h3>
@@ -324,13 +332,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
           <label className="label">예금주</label>
           <input className="input" value={form.account_holder} onChange={(e) => set("account_holder", e.target.value)} />
         </div>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="font-black">사이트 설정</h2>
-        <button type="button" onClick={() => setPwOpen(true)}
-          className="btn-outline !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5 shrink-0 hover:scale-[1.03] active:scale-95 transition-transform">
-          <ShieldCheck className="w-3.5 h-3.5" /> 비밀번호 변경
-        </button>
       </div>
 
 
