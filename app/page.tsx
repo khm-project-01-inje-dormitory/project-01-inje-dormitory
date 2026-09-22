@@ -49,24 +49,45 @@ export default async function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
         <div className="relative max-w-5xl mx-auto w-full px-5 pb-12 pt-24 text-white">
           <span className="badge bg-white/15 backdrop-blur text-white border border-white/20">
-            <HomeIcon className="w-3.5 h-3.5" /> 집 전체 대여 · 방 선택 없이 자유롭게
+            <HomeIcon className="w-3.5 h-3.5" /> {settings.hero_badge_text || "집 전체 대여 · 방 선택 없이 자유롭게"}
           </span>
           <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
             {settings.pension_name}
           </h1>
+          {settings.tagline_visible && (
+            <p className="mt-3 text-base sm:text-xl font-medium text-white/90 drop-shadow">
+              {settings.tagline}
+            </p>
+          )}
           {/* CTA: 가격 칩과 예약하기 버튼 — 그리드 2등분으로 가로폭 완전 동일, 세로 48px, 글자 중앙정렬 */}
           <div className="mt-6 grid [grid-template-columns:repeat(2,minmax(0,1fr))] gap-2.5 w-full max-w-sm">
             <div className="h-12 rounded-xl bg-white/95 text-foreground shadow-pop flex items-center justify-center gap-2">
               <span className="text-xs font-bold text-muted-foreground">1인·1박</span>
               <span className="text-base font-black text-primary tabular-nums">{fmtWon(settings.per_person_price)}</span>
             </div>
-            <Link href="/reserve" className="btn-primary h-12 !py-0 !rounded-xl !text-base">
-              예약하기 <ArrowRight className="w-4 h-4" />
-            </Link>
+            {settings.booking_paused ? (
+              <div className="h-12 rounded-xl bg-white/25 text-white flex items-center justify-center gap-2 text-sm font-bold backdrop-blur cursor-not-allowed border border-white/30">
+                예약 일시 중지
+              </div>
+            ) : (
+              <Link href="/reserve" className="btn-primary h-12 !py-0 !rounded-xl !text-base">
+                예약하기 <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </div>
       </section>
 
+      {settings.booking_paused && (
+        <div className="max-w-5xl mx-auto px-5 mt-6">
+          <div className="card-surface p-5 border-2 border-amber-300 bg-amber-50/80">
+            <p className="text-sm font-bold text-amber-800">🌊 {settings.booking_pause_message || "현재 예약이 일시 중지되어 있습니다."}</p>
+            {settings.booking_resume_date && /^\d{4}-\d{2}-\d{2}$/.test(settings.booking_resume_date) && (
+              <p className="text-xs font-semibold text-amber-700 mt-1.5">예약은 {settings.booking_resume_date.replace(/-/g, ".")}부터 가능합니다.</p>
+            )}
+          </div>
+        </div>
+      )}
       <div className="max-w-5xl mx-auto px-5 space-y-10 mt-10">
         {/* ── 소개 ── */}
         <section className="grid sm:grid-cols-3 gap-3">
@@ -202,9 +223,13 @@ export default async function Home() {
 
       {/* 모바일 sticky 예약 버튼 */}
       <div className="fixed bottom-0 inset-x-0 px-4 pt-2.5 pb-3 bg-background/90 backdrop-blur border-t border-border sm:hidden z-40">
-        <Link href="/reserve" className="btn-primary w-full !py-2.5 text-[15px]">
-          원하는 날짜로 예약하기 <ArrowRight className="w-4 h-4" />
-        </Link>
+        {settings.booking_paused ? (
+          <div className="btn-primary w-full !py-2.5 text-[15px] text-center opacity-60 pointer-events-none">예약 일시 중지</div>
+        ) : (
+          <Link href="/reserve" className="btn-primary w-full !py-2.5 text-[15px]">
+            원하는 날짜로 예약하기 <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
       </div>
     </main>
   );

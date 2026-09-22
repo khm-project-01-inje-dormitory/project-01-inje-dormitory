@@ -68,6 +68,16 @@ export interface Settings {
   map_link: string;
   parking_info: string;
   arrival_info: string;
+  /** 예약 일시중지 (해외 출장·휴무 등) — 켜면 예약 전면 차단 */
+  booking_paused: boolean;
+  /** 중지 안내 문구 (관리자 편집) */
+  booking_pause_message: string;
+  /** 재개 예정일 (YYYY-MM-DD, 선택) — 날짜가 되면 자동 재개 */
+  booking_resume_date: string;
+  /** 히어로 배지 문구 (집 아이콘 우측 텍스트) */
+  hero_badge_text: string;
+  /** 한줄소개 표시 토글 — 켜면 제목 아래에 표시 */
+  tagline_visible: boolean;
   /** 메인 소개 카드 3개 — 관리자 편집/숨김 (빈 값이면 기본 문구 사용) */
   feature1_title: string;
   feature1_body: string;

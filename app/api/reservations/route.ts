@@ -36,6 +36,18 @@ export async function POST(req: Request) {
     if (!guests || guests < 1) return NextResponse.json({ error: "투숙 인원을 선택해 주세요." }, { status: 400 });
 
     const settings = await store.getSettings();
+    // 예약 일시중지 — 재개 예정일이 지났으면 자동 재개 후 판정 (관리자 복귀 전에도 안전)
+    if (settings.booking_paused) {
+      const resume = settings.booking_resume_date;
+      if (resume && /^\d{4}-\d{2}-\d{2}$/.test(resume) && todayKST() >= resume) {
+        await store.updateSettings({ booking_paused: false });
+      } else {
+        return NextResponse.json(
+          { error: settings.booking_pause_message || "현재 예약이 일시 중지되어 있습니다." },
+          { status: 503 }
+        );
+      }
+    }
     if (guests > settings.max_guests)
       return NextResponse.json({ error: `수용 인원은 최대 ${settings.max_guests}명입니다.` }, { status: 400 });
 

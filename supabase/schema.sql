@@ -144,3 +144,12 @@ alter table settings add column if not exists feature3_body text not null defaul
 alter table settings add column if not exists feature1_visible boolean not null default true;
 alter table settings add column if not exists feature2_visible boolean not null default true;
 alter table settings add column if not exists feature3_visible boolean not null default true;
+
+-- 업그레이드: 히어로 배지 문구 + 한줄소개 표시 토글
+alter table settings add column if not exists hero_badge_text text not null default '집 전체 대여 · 방 선택 없이 자유롭게';
+alter table settings add column if not exists tagline_visible boolean not null default false;
+
+-- 업그레이드: 예약 일시중지 (토글 + 안내문 + 재개 예정일 자동 복귀)
+alter table settings add column if not exists booking_paused boolean not null default false;
+alter table settings add column if not exists booking_pause_message text not null default '지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.';
+alter table settings add column if not exists booking_resume_date text not null default '';

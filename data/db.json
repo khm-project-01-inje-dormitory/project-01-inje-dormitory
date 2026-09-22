@@ -1,6 +1,20 @@
 {
   "settings": {
     "id": 1,
+    "booking_paused": false,
+    "booking_pause_message": "지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.",
+    "booking_resume_date": "",
+    "hero_badge_text": "집 전체 대여 · 방 선택 없이 자유롭게",
+    "tagline_visible": false,
+    "feature1_title": "집 전체 통대여",
+    "feature1_body": "",
+    "feature2_title": "",
+    "feature2_body": "인원 단위 예약으로 가족·친구 모임에 딱 맞습니다.",
+    "feature3_title": "간편 입금 결제",
+    "feature3_body": "카카오페이·토스로 바로 송금하세요. 카드 결제 없음.",
+    "feature1_visible": true,
+    "feature2_visible": true,
+    "feature3_visible": true,
     "pension_name": "데모 펜션 라온하우",
     "tagline": "숲과 별이 있는 집 — 집 전체를 통째로 빌려드립니다",
     "description": "거실·주방·개별 객실이 모두 갖춰진 단독 주택입니다. 방을 고를 필요 없이, 도착하시면 자유롭게 원하는 공간에서 머무실 수 있습니다. 1박, 1인당 요금제로 운영됩니다.",
@@ -17,7 +31,7 @@
     "map_link": "",
     "parking_info": "",
     "arrival_info": "",
-    "updated_at": "2026-09-21T18:08:44.149Z"
+    "updated_at": "2026-09-22T10:32:02.009Z"
   },
   "reservations": [
     {
@@ -417,6 +431,25 @@
       "deleted_at": "2026-09-22T09:58:35.058Z",
       "created_at": "2026-09-22T09:58:35.019Z",
       "updated_at": "2026-09-22T09:58:35.058Z"
+    },
+    {
+      "id": "0f5cbc0e-49ae-4d10-b5a1-97a66792162b",
+      "code": "PB-HNY7",
+      "guest_name": "자동복귀",
+      "phone": "010-5555-3333",
+      "check_in": "2026-11-10",
+      "check_out": "2026-11-12",
+      "nights": 2,
+      "guests": 2,
+      "per_person_price": 30000,
+      "total_amount": 120000,
+      "depositor": "자동복귀",
+      "message": "",
+      "status": "pending",
+      "refund_status": "none",
+      "deleted_at": "2026-09-22T10:32:02.023Z",
+      "created_at": "2026-09-22T10:32:01.981Z",
+      "updated_at": "2026-09-22T10:32:02.023Z"
     }
   ],
   "photos": [
@@ -657,6 +690,36 @@
         "deleted_at": "2026-09-22T09:58:35.060Z"
       },
       "created_at": "2026-09-22T09:58:35.060Z"
+    },
+    {
+      "id": "f1860203-6884-4ea9-a68a-67b1a27f86a2",
+      "actor": "admin",
+      "action": "hide",
+      "target_id": "0f5cbc0e-49ae-4d10-b5a1-97a66792162b",
+      "target_label": "PB-HNY7",
+      "before": {
+        "id": "0f5cbc0e-49ae-4d10-b5a1-97a66792162b",
+        "code": "PB-HNY7",
+        "guest_name": "자동복귀",
+        "phone": "010-5555-3333",
+        "check_in": "2026-11-10",
+        "check_out": "2026-11-12",
+        "nights": 2,
+        "guests": 2,
+        "per_person_price": 30000,
+        "total_amount": 120000,
+        "depositor": "자동복귀",
+        "message": "",
+        "status": "pending",
+        "refund_status": "none",
+        "deleted_at": null,
+        "created_at": "2026-09-22T10:32:01.981Z",
+        "updated_at": "2026-09-22T10:32:01.981Z"
+      },
+      "after": {
+        "deleted_at": "2026-09-22T10:32:02.025Z"
+      },
+      "created_at": "2026-09-22T10:32:02.025Z"
     }
   ]
 }
