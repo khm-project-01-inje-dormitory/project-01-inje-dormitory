@@ -9,13 +9,8 @@ import { ArrowRight, Banknote, CalendarCheck, Clock, Users, Wallet, Repeat2, Tim
 import { fmtDateKorean, fmtDateTime, fmtWon } from "@/lib/format";
 import { STATUS_LABEL, type Reservation } from "@/types";
 
-// ⚠️ 차트 라이브러리(SVG 속성)는 CSS 변수를 해석하지 못해 hex를 사용합니다.
-// 아래 hex는 app/globals.css의 디자인 토큰과 동일하게 유지하세요.
-const C_PRIMARY = "#9a4c16";
-const C_SUCCESS = "#057a55";
-const C_WARNING = "#b47807";
-const C_DANGER = "#c72d4c";
-const C_SLATE = "#64748b";
+// 차트 색은 lib/design-tokens.ts(SSOT)에서 — 라이트/다크 테마 자동 대응
+import { useChartTheme, chartCommon } from "@/lib/design-tokens";
 
 interface StatsData {
   cards: {
@@ -35,6 +30,9 @@ interface StatsData {
 export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reservations") => void }) {
   const [data, setData] = useState<StatsData | null>(null);
 
+  const chart = useChartTheme();
+  const cc = chartCommon(chart);
+
   useEffect(() => {
     fetch("/api/stats").then((r) => r.json()).then(setData).catch(() => {});
   }, []);
@@ -47,10 +45,10 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
 
   const c = data.cards;
   const mixData = [
-    { name: "입금대기", value: data.mix.pending, color: C_WARNING },
-    { name: "예약확정", value: data.mix.confirmed, color: C_SUCCESS },
-    { name: "투숙완료", value: data.mix.completed, color: C_SLATE },
-    { name: "취소", value: data.mix.cancelled, color: C_DANGER },
+    { name: "입금대기", value: data.mix.pending, color: chart.warning },
+    { name: "예약확정", value: data.mix.confirmed, color: chart.success },
+    { name: "투숙완료", value: data.mix.completed, color: chart.text },
+    { name: "취소", value: data.mix.cancelled, color: chart.danger },
   ];
 
   return (
@@ -104,15 +102,15 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data.months} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e9e2d7" vertical={false} />
-              <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#7a6f64" }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="won" tick={{ fontSize: 11, fill: "#7a6f64" }} axisLine={false} tickLine={false}
+              <CartesianGrid strokeDasharray={cc.grid.strokeDasharray} stroke={cc.grid.stroke} vertical={false} />
+              <XAxis dataKey="label" tick={cc.tick} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="won" tick={cc.tick} axisLine={false} tickLine={false}
                 tickFormatter={(v) => (v >= 10000 ? `${Math.round(v / 10000)}만` : v)} />
-              <YAxis yAxisId="cnt" orientation="right" tick={{ fontSize: 11, fill: "#7a6f64" }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number, n: string) => (n === "매출" ? fmtWon(v) : `${v}건`)} contentStyle={{ borderRadius: 12, border: "1px solid #e9e2d7" }} />
+              <YAxis yAxisId="cnt" orientation="right" tick={cc.tick} axisLine={false} tickLine={false} />
+              <Tooltip formatter={(v: number, n: string) => (n === "매출" ? fmtWon(v) : `${v}건`)} contentStyle={cc.tooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar yAxisId="won" dataKey="revenue" name="매출" fill={C_PRIMARY} radius={[8, 8, 0, 0]} maxBarSize={40} />
-              <Line yAxisId="cnt" dataKey="count" name="예약" stroke={C_SUCCESS} strokeWidth={2} dot={{ r: 3 }} />
+              <Bar yAxisId="won" dataKey="revenue" name="매출" fill={chart.primary} radius={[8, 8, 0, 0]} maxBarSize={40} />
+              <Line yAxisId="cnt" dataKey="count" name="예약" stroke={chart.success} strokeWidth={2} dot={{ r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -125,11 +123,11 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.weeks} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e9e2d7" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#7a6f64" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#7a6f64" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip formatter={(v: number) => `${v}건`} contentStyle={{ borderRadius: 12, border: "1px solid #e9e2d7" }} />
-                <Bar dataKey="count" name="예약" fill={C_SUCCESS} radius={[6, 6, 0, 0]} maxBarSize={28} />
+                <CartesianGrid strokeDasharray={cc.grid.strokeDasharray} stroke={cc.grid.stroke} vertical={false} />
+                <XAxis dataKey="label" tick={cc.tick} axisLine={false} tickLine={false} />
+                <YAxis tick={cc.tick} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip formatter={(v: number) => `${v}건`} contentStyle={cc.tooltipStyle} />
+                <Bar dataKey="count" name="예약" fill={chart.success} radius={[6, 6, 0, 0]} maxBarSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -141,12 +139,12 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
           <div className="h-36">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.dow} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#7a6f64" }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="label" tick={cc.tick} axisLine={false} tickLine={false} />
                 <YAxis hide />
-                <Tooltip formatter={(v: number) => `${v}건`} contentStyle={{ borderRadius: 12, border: "1px solid #e9e2d7" }} />
+                <Tooltip formatter={(v: number) => `${v}건`} contentStyle={cc.tooltipStyle} />
                 <Bar dataKey="count" name="예약" radius={[6, 6, 0, 0]} maxBarSize={24}>
                   {data.dow.map((_, i) => (
-                    <Cell key={i} fill={i === 5 || i === 6 ? C_PRIMARY : "#d9c9b4"} />
+                    <Cell key={i} fill={i === 5 || i === 6 ? chart.primary : chart.soft} />
                   ))}
                 </Bar>
               </BarChart>

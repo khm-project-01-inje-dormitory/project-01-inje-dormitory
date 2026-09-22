@@ -7,10 +7,10 @@ import { fmtDateKorean, fmtWon } from "@/lib/format";
 import { STATUS_LABEL, type Reservation, type ReservationStatus } from "@/types";
 
 const STATUS_STYLE: Record<ReservationStatus, string> = {
-  pending: "bg-amber-50 text-warning border border-amber-200",
-  confirmed: "bg-emerald-50 text-success border border-emerald-200",
-  cancelled: "bg-rose-50 text-danger border border-rose-200",
-  completed: "bg-slate-100 text-slate-600 border border-slate-200",
+  pending: "bg-warning/10 text-warning border border-warning/20",
+  confirmed: "bg-success/10 text-success border border-success/20",
+  cancelled: "bg-danger/10 text-danger border border-danger/20",
+  completed: "bg-muted text-muted-foreground border border-border/40",
 };
 
 /**

@@ -137,7 +137,7 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
               <div className="flex items-center justify-between">
                 <b className="text-sm">카드 {n}</b>
                 <label className="flex items-center gap-2 cursor-pointer text-xs font-bold">
-                  <input type="checkbox" checked={visible} onChange={(e) => set(vKey, e.target.checked as never)} className="w-4 h-4 accent-[hsl(154,76%,22%)]" />
+                  <input type="checkbox" checked={visible} onChange={(e) => set(vKey, e.target.checked as never)} className="w-4 h-4 accent-primary" />
                   표시
                 </label>
               </div>
@@ -229,7 +229,7 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         {blocked.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {blocked.map((b) => (
-              <span key={b.date} className="badge bg-slate-100 text-slate-600 border border-slate-200 gap-1.5">
+              <span key={b.date} className="badge bg-muted text-muted-foreground border border-border/40 gap-1.5">
                 {b.date}{b.reason ? ` · ${b.reason}` : ""}
                 <button onClick={() => removeBlocked(b.date)} className="hover:text-danger" title="해제">
                   <X className="w-3 h-3" />
@@ -259,7 +259,7 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
           </span>
           <input type="checkbox" className="sr-only" checked={form.auto_close_overbook}
             onChange={(e) => set("auto_close_overbook", e.target.checked)} />
-          <span className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.auto_close_overbook ? "bg-primary" : "bg-slate-300"}`}>
+          <span className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.auto_close_overbook ? "bg-primary" : "bg-muted border border-border"}`}>
             <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${form.auto_close_overbook ? "left-[22px]" : "left-0.5"}`} />
           </span>
         </label>

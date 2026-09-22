@@ -65,6 +65,7 @@ export default function DepositInfo({
           카카오페이로 송금
         </a>
         {/* 토스: 딥링크로 은행/계좌/금액 미리 채움 */}
+        {/* 토스 브랜드 고정색 — 디자인 토큰 예외 (브랜드 가이드) */}
         <a className="btn w-full bg-[#3182f6] text-white hover:brightness-110" href={tossLink}>
           <Link2 className="w-4 h-4" />
           토스로 송금

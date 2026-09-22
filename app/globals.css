@@ -8,6 +8,7 @@
    반드시 아래 토큰(Tailwind 매핑: tailwind.config.ts)만 사용합니다.
    ───────────────────────────────────────────────────────────── */
 :root {
+  color-scheme: light;
   --primary: 154 76 22;            /* 웜 브라운 */
   --primary-foreground: 255 253 250;
   --primary-soft: 251 243 230;     /* 연한 크림 배경 */
@@ -28,11 +29,30 @@
   --radius: 1rem;
 }
 
+/* 다크모드 — 웜 다크 브라운 (완전 검정 대신 브랜드 감성 유지) */
+.dark {
+  color-scheme: dark;
+  --background: 28 25 21;
+  --foreground: 236 231 222;
+  --card: 37 33 28;
+  --muted: 48 43 37;
+  --muted-foreground: 176 166 152;
+  --border: 59 53 45;
+  --ring: 232 181 106;
+  --primary: 232 181 106;
+  --primary-foreground: 41 37 36;
+  --primary-soft: 53 45 33;
+  --success: 52 199 145;
+  --warning: 245 190 70;
+  --danger: 255 111 133;
+}
+
 html {
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
+  transition: background-color 0.2s ease, color 0.2s ease;
   background: rgb(var(--background));
   color: rgb(var(--foreground));
   font-feature-settings: "ss01";
@@ -65,7 +85,7 @@ body {
 .btn-primary { @apply btn bg-primary text-primary-foreground shadow-card hover:brightness-110; }
 .btn-soft { @apply btn bg-primary-soft text-primary hover:brightness-[0.98]; }
 .btn-outline { @apply btn border border-border bg-card text-foreground hover:bg-muted; }
-.btn-danger { @apply btn border border-rose-200 bg-card text-danger hover:bg-rose-50; }
+.btn-danger { @apply btn border border-danger/30 bg-card text-danger hover:bg-danger/10; }
 
 /* 상태 배지 */
 .badge {
