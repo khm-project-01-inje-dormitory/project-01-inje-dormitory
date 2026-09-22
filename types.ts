@@ -73,6 +73,10 @@ export interface Photo {
   id: string;
   /** 표시용 URL (데모: /uploads/... / Supabase: Storage public URL) */
   url: string;
+  /** hero = 대문(히어로) 대형 이미지 / gallery = 소개 갤러리 (기존 데이터는 gallery 취급) */
+  kind: "hero" | "gallery";
+  /** 대문 사진 중 현재 홈 대문에 표시되는 1장 (hero만 의미 있음) */
+  active: boolean;
   caption: string;
   sort_order: number;
   created_at: string;

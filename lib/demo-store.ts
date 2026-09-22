@@ -122,6 +122,8 @@ async function initDB(): Promise<DB> {
     photos = files.map((f, i) => ({
       id: crypto.randomUUID(),
       url: `/uploads/${f}`,
+      kind: "gallery" as const,
+      active: false,
       caption: "",
       sort_order: i,
       created_at: new Date().toISOString(),
@@ -229,6 +231,16 @@ export const demoStore = {
   async listPhotos(): Promise<Photo[]> {
     const db = await readDB();
     return [...db.photos].sort((a, b) => a.sort_order - b.sort_order);
+  },
+  async updatePhoto(id: string, patch: Partial<Photo>): Promise<Photo | null> {
+    return lock(async () => {
+      const db = await readDB();
+      const idx = db.photos.findIndex((p: Photo) => p.id === id);
+      if (idx < 0) return null;
+      db.photos[idx] = { ...db.photos[idx], ...patch };
+      await writeDB(db);
+      return db.photos[idx] as Photo;
+    });
   },
   async addPhoto(p: Photo): Promise<Photo> {
     return lock(async () => {

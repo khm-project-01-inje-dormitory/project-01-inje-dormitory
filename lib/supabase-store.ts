@@ -15,6 +15,25 @@ function db(): SupabaseClient {
   return client;
 }
 
+/**
+ * 시계 드리프트 방어: 서버 시계가 미래로 살짝 밀리면 Supabase가
+ * PGRST303 "JWT issued at future" 로 요청을 거부한다 (간헐적 500/401의 원인).
+ * 짧은 대기 후 재시도하면 시계가 재동기화되며 대부분 회복된다.
+ */
+const CLOCK_ERR = ["PGRST303", "JWT issued at future"];
+export async function withClockRetry<T>(op: () => Promise<{ error: { code?: string; message: string } | null }>): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < 3; i++) {
+    const { error, ...rest } = await op() as { error: { code?: string; message: string } | null } & Record<string, unknown>;
+    if (!error) return rest as T;
+    const hit = CLOCK_ERR.some((k) => error.code === k || (error.message || "").includes(k));
+    lastErr = error;
+    if (!hit) throw new Error(`DB 오류: ${error.message}`);
+    await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+  }
+  throw new Error(`DB 오류(시계 동기화 대기 후에도 실패): ${String(lastErr)}`);
+}
+
 const SETTINGS_SEED: Partial<Settings> = {
   id: 1,
   pension_name: "우리 펜션",
@@ -98,6 +117,16 @@ export const supabaseStore = {
     const { data, error } = await db().from("photos").insert(p).select().single();
     if (error) throw error;
     return data as Photo;
+  },
+  async updatePhoto(id: string, patch: Partial<Photo>): Promise<Photo | null> {
+    const { data, error } = await db()
+      .from("photos")
+      .update(patch)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+    if (error) throw error;
+    return (data as Photo) ?? null;
   },
   async deletePhoto(id: string): Promise<boolean> {
     const { error } = await db().from("photos").delete().eq("id", id);

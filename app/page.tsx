@@ -24,7 +24,10 @@ export default async function Home() {
     settings.max_guests,
     blocked.map((b) => b.date)
   );
-  const hero = photos[0]?.url;
+  // 대문: hero 사진 중 "표시중"으로 선택된 1장 → 없으면 첫 hero → 없으면 기존 데이터 호환(첫 사진)
+  const heroPhotos = photos.filter((p) => p.kind === "hero");
+  const galleryPhotos = photos.filter((p) => p.kind !== "hero");
+  const hero = heroPhotos.find((p) => p.active)?.url ?? heroPhotos[0]?.url ?? photos[0]?.url;
   const visibleReviews = allReviews.filter((r) => r.visible).slice(0, 4);
   const reviewCount = allReviews.filter((r) => r.visible).length;
   const reviewAvg = reviewCount
@@ -88,7 +91,7 @@ export default async function Home() {
           <h2 className="text-xl font-black flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-primary" /> 라온하우 둘러보기
           </h2>
-          <PhotoGallery photos={photos} />
+          <PhotoGallery photos={galleryPhotos.length ? galleryPhotos : photos} />
         </section>
 
         {/* ── 예약 현황 ── */}

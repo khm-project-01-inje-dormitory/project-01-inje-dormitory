@@ -22,6 +22,11 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
           loading="eager"
           className="object-cover hover:scale-[1.02] transition-transform duration-500"
         />
+        {first.caption && (
+          <span className="absolute bottom-2 left-2 text-xs font-bold text-white bg-black/50 backdrop-blur rounded-lg px-2.5 py-1.5">
+            {first.caption}
+          </span>
+        )}
       </div>
       {rest.slice(0, 7).map((p, i) => (
         <div
@@ -38,6 +43,11 @@ export default function PhotoGallery({ photos }: { photos: Photo[] }) {
             loading="eager"
             className="object-cover hover:scale-[1.03] transition-transform duration-500"
           />
+          {p.caption && (
+            <span className="absolute bottom-1.5 left-1.5 right-1.5 text-[10px] sm:text-xs font-bold text-white bg-black/50 backdrop-blur rounded-lg px-2 py-1 truncate">
+              {p.caption}
+            </span>
+          )}
         </div>
       ))}
       {photos.length > 8 && (

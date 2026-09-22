@@ -49,6 +49,7 @@ create table if not exists settings (
 insert into settings (id) values (1) on conflict (id) do nothing;
 
 -- 3) 갤러리 사진
+--   kind: hero(대문 대형) / gallery(소개 갤러리) — 기본 gallery (기존 행 자동 마이그레이션)
 create table if not exists photos (
   id uuid primary key default gen_random_uuid(),
   url text not null,
@@ -109,3 +110,9 @@ alter table photos enable row level security;
 alter table push_subscriptions enable row level security;
 alter table blocked_dates enable row level security;
 alter table reviews enable row level security;
+
+-- 업그레이드: 사진 종류 분리 (대문/소개) — 기존 행은 gallery로 간주
+alter table photos add column if not exists kind text not null default 'gallery';
+
+-- 업그레이드: 대문 사진 선택 표시 (hero 중 표시할 1장)
+alter table photos add column if not exists active boolean not null default false;
