@@ -18,6 +18,10 @@ export default async function ReservePage() {
   if (paused) {
     return (
       <main className="max-w-lg mx-auto px-5 pb-16">
+      <div className="text-center text-sm text-muted-foreground">
+        이미 예약하셨나요?{" "}
+        <Link href="/lookup" className="font-bold text-primary underline underline-offset-2">예약 조회·수정</Link>
+      </div>
         <div className="py-5 flex items-center gap-3">
           <Link href="/" className="w-10 h-10 rounded-xl border border-border flex items-center justify-center hover:bg-muted">
             <ArrowLeft className="w-5 h-5" />

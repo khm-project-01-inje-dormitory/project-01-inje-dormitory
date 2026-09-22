@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { CheckCircle2, FileText, Home } from "lucide-react";
 import DepositInfo from "@/components/DepositInfo";
+import ShareReservation from "@/components/ShareReservation";
 import { store } from "@/lib/store";
 import { fmtDateKorean, fmtWon } from "@/lib/format";
 import { STATUS_LABEL } from "@/types";
@@ -24,6 +26,20 @@ export default async function ReserveDonePage({
     );
   }
   const s = await store.getSettings();
+  const hd = headers();
+  const origin = `${hd.get("x-forwarded-proto") ?? "http"}://${hd.get("host") ?? ""}`;
+
+
+  const notice = [
+    `[${s.pension_name}] 예약 접수 완료`,
+    `예약코드: ${reservation.code}`,
+    `일정: ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박)`,
+    `인원: ${reservation.guests}명`,
+    `금액: ${reservation.total_amount.toLocaleString()}원`,
+    `입금: ${s.bank_name} ${s.account_number} (${s.account_holder})`,
+    `예약 조회·수정: ${origin}/lookup`,
+  ].join("\n");
+  const short = `[${s.pension_name}] 예약 접수 완료 · ${reservation.code} · ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박, ${reservation.guests}명)`;
 
   return (
     <main className="max-w-lg mx-auto px-5 pb-16">
@@ -47,6 +63,12 @@ export default async function ReserveDonePage({
         holder={s.account_holder}
         amount={reservation.total_amount}
       />
+
+      <div className="card-surface p-5 mt-4">
+        <h2 className="font-black mb-1">예약 내용을 카톡에 보관하세요</h2>
+        <p className="text-xs text-muted-foreground mb-3">복사해 카카오톡 "나와의 채팅"에 붙여넣으면 예약 내용을 잊지 않습니다.</p>
+        <ShareReservation text={notice} short={short} />
+      </div>
 
       <div className="card-surface p-5 mt-4">
         <h2 className="font-black mb-3">예약 내용</h2>

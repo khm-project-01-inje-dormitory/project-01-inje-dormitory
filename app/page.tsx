@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Banknote, CarFront, Clock3, Footprints, Home as HomeIcon, MapPin, Sparkles, Star, Users } from "lucide-react";
+import { ArrowRight, Banknote, CarFront, Clock3, Footprints, Home as HomeIcon, MapPin, Sparkles, Star, Users, Search } from "lucide-react";
 import PhotoGallery from "@/components/PhotoGallery";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import { store, computeAvailability } from "@/lib/store";
@@ -219,19 +219,27 @@ export default async function Home() {
 
         <footer className="border-t border-border py-8 flex items-center justify-between text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} {settings.pension_name}</span>
-          <Link href="/admin" className="hover:text-foreground">관리자 페이지</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/lookup" className="hover:text-foreground">예약 조회·수정</Link>
+            <Link href="/admin" className="hover:text-foreground">관리자 페이지</Link>
+          </div>
         </footer>
       </div>
 
       {/* 모바일 sticky 예약 버튼 */}
       <div className="fixed bottom-0 inset-x-0 px-4 pt-2.5 pb-3 bg-background/90 backdrop-blur border-t border-border sm:hidden z-40">
-        {settings.booking_paused ? (
-          <div className="btn-primary w-full !py-2.5 text-[15px] text-center opacity-60 pointer-events-none">예약 일시 중지</div>
-        ) : (
-          <Link href="/reserve" className="btn-primary w-full !py-2.5 text-[15px]">
-            원하는 날짜로 예약하기 <ArrowRight className="w-4 h-4" />
+        <div className="flex items-center gap-2">
+          <Link href="/lookup" className="btn-outline !py-2.5 !px-3.5 text-xs shrink-0 inline-flex items-center gap-1">
+            <Search className="w-3.5 h-3.5" /> 예약 조회
           </Link>
-        )}
+          {settings.booking_paused ? (
+            <div className="btn-primary flex-1 !py-2.5 text-[15px] text-center opacity-60 pointer-events-none">예약 일시 중지</div>
+          ) : (
+            <Link href="/reserve" className="btn-primary flex-1 !py-2.5 text-[15px]">
+              원하는 날짜로 예약하기 <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );

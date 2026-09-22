@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 
 const normPhone = (s: string) => s.replace(/[^0-9]/g, "");
+const normName = (s: string) => s.trim().replace(/\s+/g, "");
 const normCode = (s: string) => s.trim().toUpperCase();
 
 /**
@@ -12,7 +13,7 @@ const normCode = (s: string) => s.trim().toUpperCase();
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const phone = normPhone(String(body.phone ?? ""));
-  const name = String(body.name ?? "").trim();
+  const name = normName(String(body.name ?? ""));
   const code = normCode(String(body.code ?? ""));
   if (!phone) return NextResponse.json({ error: "연락처를 입력해 주세요." }, { status: 400 });
   if (!name && !code)

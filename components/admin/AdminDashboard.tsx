@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  BarChart3, Banknote, CalendarCheck2, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2,
-} from "lucide-react";
+  BarChart3, Banknote, CalendarCheck2, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2, LogOut } from "lucide-react";
 import StatsTab from "./StatsTab";
 import ReservationTable from "./ReservationTable";
 import GalleryTab from "./GalleryTab";
@@ -51,6 +50,14 @@ export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
               <RefreshCw className="w-4 h-4" />
             </button>
             <a href="/" className="btn-soft !px-3 !py-2 text-xs">사이트 보기</a>
+            <button className="btn-outline !px-3 !py-2 text-xs inline-flex items-center gap-1.5"
+              onClick={async () => {
+                if (!confirm("로그아웃하시겠습니까?")) return;
+                try { await fetch("/api/admin/logout", { method: "POST" }); } catch { /* 네트워크 오류에도 로그인 화면으로 */ }
+                window.location.href = "/admin";
+              }}>
+              <LogOut className="w-3.5 h-3.5" /> 로그아웃
+            </button>
           </div>
         </div>
         {/* 탭 — 모바일에서 가로 스크롤 */}
