@@ -88,6 +88,7 @@ function seedReservations(): Reservation[] {
       message: "",
       status,
       refund_status: status === "cancelled" ? refund : "none",
+      deleted_at: null,
       created_at: new Date(Date.now() + (offset - 10) * 86400000).toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -196,6 +197,20 @@ export const demoStore = {
       await writeDB(db);
       return db.settings;
     });
+  },
+  async listDeletedReservations(): Promise<Reservation[]> {
+    const db = await readDB();
+    return db.photos.length >= 0 ? ((db as unknown as { reservations: Reservation[] }).reservations.filter((r: Reservation) => (r as unknown as { deleted_at?: string }).deleted_at)).sort((a, b) => String((b as unknown as { deleted_at?: string }).deleted_at).localeCompare(String((a as unknown as { deleted_at?: string }).deleted_at))) : [];
+  },
+  async addAuditLog(log: { action: string; target_id: string; target_label?: string; before?: unknown; after?: unknown }): Promise<void> {
+    const db = await readDB() as unknown as { audit_logs?: unknown[]; };
+    db.audit_logs = db.audit_logs || [];
+    db.audit_logs.push({ id: crypto.randomUUID(), actor: "admin", ...log, before: log.before ?? {}, after: log.after ?? {}, created_at: new Date().toISOString() });
+    await writeDB(db as never);
+  },
+  async listAuditLogs(limit = 50): Promise<unknown[]> {
+    const db = await readDB() as unknown as { audit_logs?: unknown[] };
+    return (db.audit_logs || []).slice(0, limit);
   },
   async listReservations(): Promise<Reservation[]> {
     const db = await readDB();

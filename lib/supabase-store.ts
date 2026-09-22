@@ -81,9 +81,39 @@ export const supabaseStore = {
     const { data, error } = await db()
       .from("reservations")
       .select("*")
+      .is("deleted_at", null)          // 소프트 삭제(숨김) 건은 목록·통계에서 제외
       .order("check_in", { ascending: true });
     if (error) throw error;
     return (data ?? []) as Reservation[];
+  },
+  /** 숨김(소프트 삭제)된 예약 목록 — 복구 화면용 */
+  async listDeletedReservations(): Promise<Reservation[]> {
+    const { data, error } = await db()
+      .from("reservations")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as Reservation[];
+  },
+  async addAuditLog(log: { action: string; target_id: string; target_label?: string; before?: unknown; after?: unknown }): Promise<void> {
+    await db().from("audit_logs").insert({
+      actor: "admin",
+      action: log.action,
+      target_id: log.target_id,
+      target_label: log.target_label ?? "",
+      before: (log.before ?? {}) as object,
+      after: (log.after ?? {}) as object,
+    });
+  },
+  async listAuditLogs(limit = 50): Promise<unknown[]> {
+    const { data, error } = await db()
+      .from("audit_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data ?? [];
   },
   async createReservation(r: Reservation): Promise<Reservation> {
     const { data, error } = await db().from("reservations").insert(r).select().single();

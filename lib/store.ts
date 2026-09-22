@@ -52,6 +52,28 @@ export async function uploadPhotoFile(file: File): Promise<string> {
   return uploadToSupabaseStorage(Buffer.from(await file.arrayBuffer()), safeName, file.type || "image/jpeg");
 }
 
+/** 숨김된 예약 목록 (복구 화면용) */
+export async function listDeletedReservations(): Promise<Reservation[]> {
+  const s = store as unknown as { listDeletedReservations?: () => Promise<Reservation[]> };
+  if (s.listDeletedReservations) return s.listDeletedReservations();
+  return []; // 데모 모드 미지원 시 빈 목록
+}
+
+/** 소프트 삭제/복구/감사로그 — 운영 이력 보존용 (제안 A+B) */
+export async function softDeleteReservation(id: string, label: string, before: unknown): Promise<void> {
+  await store.updateReservation(id, { deleted_at: new Date().toISOString() } as never);
+  await store.addAuditLog({ action: "hide", target_id: id, target_label: label, before, after: { deleted_at: new Date().toISOString() } });
+}
+export async function restoreReservation(id: string, label: string): Promise<void> {
+  await store.updateReservation(id, { deleted_at: null } as never);
+  await store.addAuditLog({ action: "restore", target_id: id, target_label: label, after: { deleted_at: null } });
+}
+export async function purgeReservation(id: string, label: string, before: unknown): Promise<void> {
+  await store.addAuditLog({ action: "purge", target_id: id, target_label: label, before, after: { purged: true } });
+  const del = store as unknown as { deleteReservation?: (id: string) => Promise<boolean> };
+  if (del.deleteReservation) await del.deleteReservation(id);
+}
+
 export async function deletePhotoFileIfLocal(url: string): Promise<void> {
   if (!url.startsWith("/uploads/") || url.includes("seed-")) return; // 시드는 유지
   const fs = await import("node:fs/promises");

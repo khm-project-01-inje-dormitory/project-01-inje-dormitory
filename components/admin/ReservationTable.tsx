@@ -176,8 +176,8 @@ export default function ReservationTable({
                         투숙완료
                       </button>
                     )}
-                    {r.status === "confirmed" && (
-                      <button className="btn-danger !py-2 !px-4 text-sm" onClick={() => patch(r.id, { status: "cancelled", refund_status: "pending" }, "예약을 취소하고 환불대기로 처리하시겠습니까?")}>
+                    {(r.status === "confirmed" || r.status === "pending") && (
+                      <button className="btn-danger !py-2 !px-4 text-sm" onClick={() => patch(r.id, { status: "cancelled", refund_status: r.status === "confirmed" ? "pending" : "none" }, r.status === "confirmed" ? "예약을 취소하고 환불대기로 처리하시겠습니까?" : "입금 전 예약을 취소 처리하시겠습니까?")}>
                         <X className="w-4 h-4" /> 취소
                       </button>
                     )}
@@ -199,6 +199,12 @@ export default function ReservationTable({
                     {r.status === "completed" && (
                       <button className="btn-soft !py-2 !px-4 text-sm" onClick={() => patch(r.id, { status: "confirmed" }, "투숙완료를 해제하시겠습니까?")}>
                         투숙완료 해제
+                      </button>
+                    )}
+                    {/* 최후 수단: 숨김(소프트 삭제) — 이력 보존, 복구 가능 */}
+                    {r.status === "cancelled" && (
+                      <button className="btn-soft !py-2 !px-4 text-xs text-muted-foreground" onClick={() => patch(r.id, { deleted_at: new Date().toISOString() } as never, "목록에서 숨길까요? (취소 이력은 DB에 보존되고 복구 가능합니다)")}>
+                        숨김
                       </button>
                     )}
                     {(r.status === "pending" || r.status === "confirmed") && (

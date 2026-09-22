@@ -116,3 +116,20 @@ alter table photos add column if not exists kind text not null default 'gallery'
 
 -- 업그레이드: 대문 사진 선택 표시 (hero 중 표시할 1장)
 alter table photos add column if not exists active boolean not null default false;
+
+-- ============================================================
+--  업그레이드: 소프트 삭제 + 감사로그 (제안 A+B)
+-- ============================================================
+alter table reservations add column if not exists deleted_at timestamptz;
+
+create table if not exists audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  actor text not null default 'admin',
+  action text not null,
+  target_id text not null,
+  target_label text not null default '',
+  before jsonb not null default '{}'::jsonb,
+  after jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+alter table audit_logs enable row level security;

@@ -76,6 +76,7 @@ export async function POST(req: Request) {
       message,
       status: "pending",
       refund_status: "none",
+      deleted_at: null,
       created_at: now,
       updated_at: now,
     });

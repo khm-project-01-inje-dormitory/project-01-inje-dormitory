@@ -42,6 +42,8 @@ export interface Reservation {
   refund_status: RefundStatus;
   created_at: string;
   updated_at: string;
+  /** 소프트 삭제(숨김) 시각 — null이면 정상 표시 건 */
+  deleted_at: string | null;
 }
 
 export interface Settings {
@@ -116,4 +118,16 @@ export interface DayAvailability {
   remaining: number;
   /** 관리자 지정 휴무일 */
   blocked?: boolean;
+}
+
+/** 관리자 조작 감사로그 (제안 B) */
+export interface AuditLog {
+  id: string;
+  actor: string;          // "admin"
+  action: string;         // hide | restore | purge | status | refund | settings ...
+  target_id: string;      // 대상 행 id
+  target_label: string;   // 예약코드 등 (삭제돼도 식별 가능)
+  before: string;         // 변경 전 스냅샷 (JSON)
+  after: string;          // 변경 후 스냅샷 (JSON)
+  created_at: string;
 }
