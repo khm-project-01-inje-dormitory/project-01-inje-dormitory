@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown } from "lucide-react";
+import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown, Undo2, Trash2 } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
@@ -43,10 +43,50 @@ export default function ReservationTable({
   const [statusFilter, setStatusFilterRaw] = useState<"all" | ReservationStatus>(() => loadPref("status", "all" as "all" | ReservationStatus));
   const [sortKey, setSortKeyRaw] = useState<"newest" | "checkin" | "amount_desc" | "amount_asc">(() => loadPref("sort", "newest" as "newest" | "checkin" | "amount_desc" | "amount_asc"));
   const [visible, setVisibleRaw] = useState(20);
+  const [hiddenRows, setHiddenRows] = useState<Reservation[]>([]);
+  const [showHidden, setShowHidden] = useState(false);
 
   const setStatusFilter = (v: "all" | ReservationStatus) => { setStatusFilterRaw(v); savePref("status", v); };
   const setSortKey = (v: typeof sortKey) => { setSortKeyRaw(v); savePref("sort", v); setVisibleRaw(20); };
   const setQ = (v: string) => { setQRaw(v); savePref("q", v); };
+
+  /** 숨김 예약 복원 — 복원 시점에 해당 기간 정원 재검사해 초과면 경고 */
+  async function restoreHidden(r: Reservation) {
+    const nights: string[] = [];
+    for (let d = new Date(r.check_in + "T00:00:00"); d < new Date(r.check_out + "T00:00:00"); d.setDate(d.getDate() + 1))
+      nights.push(d.toISOString().slice(0, 10));
+    const busy = nights.reduce((mx, n) => Math.max(mx,
+      rows.filter((o) => o.id !== r.id && o.status !== "cancelled" && o.check_in <= n && n < o.check_out)
+        .reduce((sum, o) => sum + o.guests, 0)), 0);
+    const over = settings && busy + r.guests > settings.max_guests;
+    const msg = over
+      ? `복원하면 ${r.check_in} 밤 기준 최대 ${busy + r.guests}명이 수용 인원(${settings?.max_guests}명)을 초과합니다. 그래도 복원할까요?`
+      : `숨김을 해제하고 목록으로 복원할까요? (${r.guest_name} · ${r.check_in} ~ ${r.check_out})`;
+    if (!confirm(msg)) return;
+    setBusyId(r.id);
+    try {
+      const res = await fetch(`/api/reservations/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ restore: true }) });
+      if (!res.ok) throw new Error((await res.json()).error ?? "복원 실패");
+      setShowHidden(false);
+      await load();
+      onChanged?.();
+    } catch (e) { alert(e instanceof Error ? e.message : "복원 중 오류가 발생했습니다."); }
+    finally { setBusyId(null); }
+  }
+
+  /** 영구삭제 — 되돌릴 수 없음, 더블 확인 */
+  async function purgeHidden(r: Reservation) {
+    if (!confirm(`영구삭제하면 예약 데이터가 완전히 사라지고 복구할 수 없습니다. (감사로그만 남습니다)\n${r.guest_name} · ${r.code} — 계속할까요?`)) return;
+    if (!confirm("정말 영구삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
+    setBusyId(r.id);
+    try {
+      const res = await fetch(`/api/reservations/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ purge: true }) });
+      if (!res.ok) throw new Error((await res.json()).error ?? "영구삭제 실패");
+      await load();
+      onChanged?.();
+    } catch (e) { alert(e instanceof Error ? e.message : "영구삭제 중 오류가 발생했습니다."); }
+    finally { setBusyId(null); }
+  }
 
   // CSV 내보내기 기간 (기본: 3개월 전 ~ 6개월 후)
   const [expFrom, setExpFrom] = useState(shiftDate(-90));
@@ -60,6 +100,10 @@ export default function ReservationTable({
       let list: Reservation[] = data.reservations ?? [];
       if (mode === "pending") list = list.filter((r) => r.status === "pending");
       setRows(list);
+      try {
+        const h = await fetch("/api/reservations/hidden");
+        if (h.ok) setHiddenRows((await h.json()).reservations ?? []);
+      } catch { setHiddenRows([]); }
     } finally {
       setLoading(false);
     }
@@ -155,6 +199,14 @@ export default function ReservationTable({
             </button>
           );
         })}
+        {hiddenRows.length > 0 && (
+          <button type="button" onClick={() => setShowHidden(!showHidden)} aria-pressed={showHidden}
+            title={showHidden ? "숨김 보관함 닫기" : "숨김된 예약 보기"}
+            className={`badge border transition-all duration-200 select-none cursor-pointer hover:scale-[1.04] hover:shadow-sm active:scale-95 ${
+              showHidden ? "bg-slate-600 border-slate-500 text-white shadow-sm ring-2 ring-slate-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+            숨김 {hiddenRows.length}건{showHidden ? " ✓" : ""}
+          </button>
+        )}
       </div>
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="font-black">{mode === "pending" ? "입금 대기 예약" : `전체 예약 ${rows.length}건`}</h2>
@@ -190,7 +242,41 @@ export default function ReservationTable({
         )}
       </div>
 
-      {filtered.length === 0 ? (
+      {showHidden ? (
+        hiddenRows.length === 0 ? (
+          <div className="card-surface p-10 text-center text-muted-foreground">숨김된 예약이 없습니다.</div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground px-1">숨김된 예약 {hiddenRows.length}건 — 복원하면 목록으로 돌아갑니다. (숨김·복원 모두 감사로그에 기록됩니다)</p>
+            {hiddenRows.map((r) => (
+              <div key={r.id} className="card-surface p-4 sm:px-5">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <b className="text-[15px]">{r.guest_name}</b>
+                      <span className="text-xs text-muted-foreground">{r.code}</span>
+                      <span className={`badge ${STATUS_STYLE[r.status]}`}>{STATUS_LABEL[r.status]}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {r.check_in} ~ {r.check_out} · {r.guests}명 · {r.total_amount.toLocaleString()}원
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="btn-primary !py-2 !px-4 text-sm inline-flex items-center gap-1.5" disabled={busyId === r.id}
+                      onClick={() => restoreHidden(r)}>
+                      <Undo2 className="w-4 h-4" /> 목록으로 복원
+                    </button>
+                    <button className="btn-danger !py-2 !px-4 text-sm inline-flex items-center gap-1.5" disabled={busyId === r.id}
+                      onClick={() => purgeHidden(r)}>
+                      <Trash2 className="w-4 h-4" /> 영구삭제
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : filtered.length === 0 ? (
         <div className="card-surface p-10 text-center text-muted-foreground">
           {mode === "pending" ? "입금 대기 중인 예약이 없습니다. 👍" : statusFilter !== "all" ? `${STATUS_LABEL[statusFilter]} 예약이 없습니다.` : "예약이 없습니다."}
         </div>
@@ -296,7 +382,7 @@ export default function ReservationTable({
           ))}
         </div>
       )}
-      {filtered.length > shown.length && (
+      {!showHidden && filtered.length > shown.length && (
         <div className="flex flex-col items-center gap-1.5 mt-4 mb-2">
           <button type="button" onClick={() => setVisibleRaw((v) => v + 20)} className="btn-outline !py-2.5 !px-6 text-sm">
             더 보기 <span className="text-muted-foreground font-normal">(남은 {filtered.length - shown.length}건)</span>

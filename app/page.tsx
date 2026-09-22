@@ -62,7 +62,7 @@ export default async function Home() {
             </p>
           )}
           {/* CTA: 가격 칩과 예약하기 버튼 — 그리드 2등분으로 가로폭 완전 동일, 세로 48px, 글자 중앙정렬 */}
-          <div className="mt-6 grid [grid-template-columns:repeat(2,minmax(0,1fr))] gap-2.5 w-full max-w-sm">
+          <div className="mt-6 grid [grid-template-columns:repeat(3,minmax(0,1fr))] gap-2.5 w-full max-w-md">
             <div className="h-12 rounded-xl bg-white/95 text-foreground shadow-pop flex items-center justify-center gap-2">
               <span className="text-xs font-bold text-muted-foreground">1인·1박</span>
               <span className="text-base font-black text-primary tabular-nums">{fmtWon(settings.per_person_price)}</span>
@@ -76,6 +76,11 @@ export default async function Home() {
                 예약하기 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
+            <Link href="/lookup"
+              className="h-12 !py-0 !rounded-xl inline-flex items-center justify-center gap-1.5 text-sm font-bold bg-white/15 text-white border border-white/30 backdrop-blur hover:bg-white/25 transition-colors"
+              title="이름·연락처로 내 예약 찾기">
+              <Search className="w-4 h-4" /> 예약조회
+            </Link>
           </div>
         </div>
       </section>
@@ -219,10 +224,7 @@ export default async function Home() {
 
         <footer className="border-t border-border py-8 flex items-center justify-between text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} {settings.pension_name}</span>
-          <div className="flex items-center gap-3">
-            <Link href="/lookup" className="hover:text-foreground">예약 조회·수정</Link>
-            <Link href="/admin" className="hover:text-foreground">관리자 페이지</Link>
-          </div>
+          <Link href="/admin" className="hover:text-foreground">관리자 페이지</Link>
         </footer>
       </div>
 
