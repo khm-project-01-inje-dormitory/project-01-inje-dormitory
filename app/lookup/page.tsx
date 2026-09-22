@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, Star } from "lucide-react";
 import { fmtDateKorean, fmtWon } from "@/lib/format";
-import { STATUS_LABEL, type Reservation, type ReservationStatus } from "@/types";
+import { STATUS_LABEL, type Reservation, type ReservationStatus, type Settings } from "@/types";
+import ShareReservation from "@/components/ShareReservation";
 
 const STATUS_STYLE: Record<ReservationStatus, string> = {
   pending: "bg-warning/10 text-warning border border-warning/20",
@@ -24,6 +25,11 @@ export default function LookupPage() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState<Settings | null>(null);
+  useEffect(() => {
+    fetch("/api/settings").then((r) => (r.ok ? r.json() : null)).then((d) => setSettings(d?.settings ?? null)).catch(() => {});
+  }, []);
+
   // 예약 수정 상태 (입금대기 예약만 — 입금확정 후에는 수정 불가 정책)
   const [editTarget, setEditTarget] = useState<Reservation | null>(null);
   const [editIn, setEditIn] = useState("");
@@ -132,6 +138,24 @@ export default function LookupPage() {
     }
   }
 
+  function buildNotice(r: Reservation, origin: string): string {
+    return [
+      `[${settings?.pension_name ?? "펜션"}] 예약 확인`,
+      `- 예약코드: ${r.code}`,
+      `- 일정: ${r.check_in} ~ ${r.check_out} (${r.nights}박)`,
+      `- 인원: ${r.guests}명`,
+      `- 금액: ${r.total_amount.toLocaleString()}원`,
+      settings?.bank_name && `- 입금: ${settings.bank_name} ${settings.account_number} (${settings.account_holder})`,
+      settings?.contact_phone && `- 문의: ${settings.contact_phone}`,
+      settings?.address && `- 주소: ${settings.address}`,
+      `- 예약 조회·수정: ${origin}/lookup`,
+    ].filter(Boolean).join("\n");
+  }
+  function shortNotice(r: Reservation): string {
+    return `[${settings?.pension_name ?? "펜션"}] 예약 ${STATUS_LABEL[r.status]} · ${r.code} · ${r.check_in} ~ ${r.check_out} (${r.nights}박, ${r.guests}명)` +
+      (settings?.contact_phone ? ` · 문의 ${settings.contact_phone}` : "");
+  }
+
   return (
     <main className="max-w-lg mx-auto px-5 pb-16">
       <div className="py-5 flex items-center gap-3">
@@ -168,6 +192,7 @@ export default function LookupPage() {
           <p className="text-sm font-bold">{results.length}건의 예약을 찾았습니다</p>
           {results.map((r) => {
             const cancellable = r.status === "pending" || r.status === "confirmed";
+            const shareable = r.status === "pending" || r.status === "confirmed";
             return (
               <div key={r.id} className="card-surface p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -180,8 +205,19 @@ export default function LookupPage() {
                   <div className="flex justify-between"><dt className="text-muted-foreground">금액</dt><dd className="font-extrabold text-primary">{fmtWon(r.total_amount)}</dd></div>
                 </dl>
 
+                {shareable && (
+                  <div className="mt-4 space-y-2">
+                    <ShareReservation text={buildNotice(r, typeof window !== "undefined" ? window.location.origin : "")} short={shortNotice(r)} />
+                    {r.status === "pending" && settings?.bank_name && (
+                      <button className="btn w-full bg-[#ffe812] text-[#181600] hover:brightness-105"
+                        onClick={async () => { try { await navigator.clipboard.writeText(`${settings.bank_name} ${settings.account_number} ${settings.account_holder}`); } catch {} window.location.href = "kakaopay://"; }}>
+                        💳 카카오페이로 송금
+                      </button>
+                    )}
+                  </div>
+                )}
                 {cancellable && (
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-3">
                     {r.status === "pending" && (
                       <button className="btn-outline flex-1" onClick={() => { setEditTarget(r); setEditIn(r.check_in); setEditOut(r.check_out); setEditGuests(String(r.guests)); setEditMsg(""); }}>
                         날짜·인원 수정
@@ -204,7 +240,7 @@ export default function LookupPage() {
                     <div><label className="label">투숙 인원</label>
                       <input type="text" inputMode="numeric" className="input max-w-[110px]" value={editGuests} onChange={(e) => setEditGuests(e.target.value.replace(/\D/g, "").slice(0, 3))} />
                     </div>
-                    <div className="flex justify-between text-sm bg-white/70 rounded-lg px-3 py-2">
+                    <div className="flex justify-between text-sm bg-primary-soft text-foreground rounded-lg px-3 py-2">
                       <span className="text-muted-foreground">{editNights(editIn, editOut)}박 · {Number(editGuests) || 0}명</span>
                       <b className="text-primary tabular-nums">{fmtWon(editTarget.per_person_price * (Number(editGuests) || 0) * editNights(editIn, editOut))}</b>
                     </div>
