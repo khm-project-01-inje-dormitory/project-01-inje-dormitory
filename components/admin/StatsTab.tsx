@@ -63,7 +63,7 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
       </div>
 
       {c.pendingCount > 0 && (
-        <button onClick={() => onGoto("deposits")} className="w-full flex items-center justify-between rounded-card bg-amber-50 border border-amber-200 px-5 py-4 text-left hover:brightness-[0.99]">
+        <button onClick={() => onGoto("deposits")} className="w-full flex items-center justify-between rounded-card bg-warning/10 border border-warning/20 px-5 py-4 text-left hover:brightness-[0.99]">
           <div>
             <div className="font-bold text-warning">입금 확인이 필요한 예약이 {c.pendingCount}건 있습니다</div>
             <div className="text-xs text-warning/80 mt-0.5">확인 총액 {fmtWon(c.pendingAmount)}</div>
@@ -72,7 +72,7 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
         </button>
       )}
       {c.refundPendingCount > 0 && (
-        <button onClick={() => onGoto("reservations")} className="w-full flex items-center justify-between rounded-card bg-rose-50 border border-rose-200 px-5 py-4 text-left hover:brightness-[0.99]">
+        <button onClick={() => onGoto("reservations")} className="w-full flex items-center justify-between rounded-card bg-danger/10 border border-danger/20 px-5 py-4 text-left hover:brightness-[0.99]">
           <div>
             <div className="font-bold text-danger">환불 대기가 {c.refundPendingCount}건 있습니다 — 취소 예약의 환불을 완료 처리해 주세요</div>
             <div className="text-xs text-danger/80 mt-0.5">환불 예정액 {fmtWon(c.refundPendingAmount)}</div>
@@ -221,7 +221,7 @@ function StatCard({
   tone?: "default" | "primary" | "warning"; action?: () => void; hint?: string;
 }) {
   const toneCls =
-    tone === "primary" ? "bg-primary text-primary-foreground" : tone === "warning" ? "bg-amber-50 text-warning" : "bg-primary-soft text-primary";
+    tone === "primary" ? "bg-primary text-primary-foreground" : tone === "warning" ? "bg-warning/10 text-warning border border-warning/20" : "bg-primary-soft text-primary";
   return (
     <div className={`card-surface p-4 sm:p-5 ${action ? "cursor-pointer hover:shadow-pop transition-shadow" : ""}`}
       onClick={action} role={action ? "button" : undefined} title={hint}>

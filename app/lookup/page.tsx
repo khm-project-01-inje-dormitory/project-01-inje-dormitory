@@ -216,7 +216,7 @@ export default function LookupPage() {
                   </div>
                 )}
                 {r.status === "pending" && (
-                  <p className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-semibold text-warning">
+                  <p className="mt-3 rounded-xl bg-warning/10 border border-warning/20 px-4 py-2.5 text-xs font-semibold text-warning">
                     아직 입금 확인 전입니다 — 총 {fmtWon(r.total_amount)} 입금 후 관리자 확인 시 확정됩니다.
                   </p>
                 )}
@@ -244,7 +244,7 @@ export default function LookupPage() {
                         </div>
                       </div>
                     ) : (
-                      <p className="mt-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-xs font-semibold text-success">
+                      <p className="mt-3 rounded-xl bg-success/10 border border-success/20 px-4 py-2.5 text-xs font-semibold text-success">
                         소중한 후기 감사합니다! 메인페이지에 소개되어 다른 손님에게 도움이 됩니다.
                       </p>
                     )

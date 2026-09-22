@@ -85,7 +85,7 @@ export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
         {/* 예약 ON/OFF 토글 — 헤더 바로 아래 고정 */}
         {settings && (
-          <div className={`card-surface p-4 flex items-center justify-between gap-4 flex-wrap border-2 ${settings.booking_paused ? "border-amber-300 bg-amber-50/70" : ""}`}>
+          <div className={`card-surface p-4 flex items-center justify-between gap-4 flex-wrap border-2 ${settings.booking_paused ? "border-warning/40 bg-warning/10" : ""}`}>
             <div className="min-w-0">
               <b className="text-sm block">예약 접수 {settings.booking_paused ? "일시 중지 중" : "정상 운영 중"}</b>
               <span className="text-xs text-muted-foreground">
@@ -105,7 +105,7 @@ export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
                 });
                 if (res.ok) refresh();
               }}
-              className={`w-14 h-8 rounded-full relative transition-colors shrink-0 ${settings.booking_paused ? "bg-amber-500" : "bg-primary"}`}
+              className={`w-14 h-8 rounded-full relative transition-colors shrink-0 ${settings.booking_paused ? "bg-warning" : "bg-primary"}`}
               title={settings.booking_paused ? "예약 재개" : "예약 일시중지"}
             >
               <span className={`absolute top-0.5 w-7 h-7 rounded-full bg-white shadow transition-all ${settings.booking_paused ? "left-[26px]" : "left-0.5"}`} />

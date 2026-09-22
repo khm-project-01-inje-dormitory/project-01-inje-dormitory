@@ -29,7 +29,7 @@ export default async function ReservePage() {
           <h1 className="text-xl font-black">예약 신청</h1>
         </div>
         <div className="card-surface p-8 text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-2xl">🌊</div>
+          <div className="w-14 h-14 rounded-2xl bg-warning/10 border border-warning/20 flex items-center justify-center mx-auto text-2xl">🌊</div>
           <h2 className="font-black text-lg">지금은 예약을 쉬어가는 중입니다</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">{settings.booking_pause_message || "현재 예약이 일시 중지되어 있습니다."}</p>
           {settings.booking_resume_date && /^\d{4}-\d{2}-\d{2}$/.test(settings.booking_resume_date) && (

@@ -54,7 +54,7 @@ const DEFAULT_SETTINGS: Settings = {
   check_in_time: "15:00",
   check_out_time: "11:00",
   auto_close_overbook: false,
-  address: "",
+  address: "강원도 인제군 인제읍 내린천로 6534-39 데모펜션",
   map_link: "",
   parking_info: "",
   arrival_info: "",

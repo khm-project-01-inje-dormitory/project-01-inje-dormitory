@@ -32,14 +32,16 @@ export default async function ReserveDonePage({
 
   const notice = [
     `[${s.pension_name}] 예약 접수 완료`,
-    `예약코드: ${reservation.code}`,
-    `일정: ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박)`,
-    `인원: ${reservation.guests}명`,
-    `금액: ${reservation.total_amount.toLocaleString()}원`,
-    `입금: ${s.bank_name} ${s.account_number} (${s.account_holder})`,
-    `예약 조회·수정: ${origin}/lookup`,
-  ].join("\n");
-  const short = `[${s.pension_name}] 예약 접수 완료 · ${reservation.code} · ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박, ${reservation.guests}명)`;
+    `- 예약코드: ${reservation.code}`,
+    `- 일정: ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박)`,
+    `- 인원: ${reservation.guests}명`,
+    `- 금액: ${reservation.total_amount.toLocaleString()}원`,
+    `- 입금: ${s.bank_name} ${s.account_number} (${s.account_holder})`,
+    s.contact_phone && `- 문의: ${s.contact_phone}`,
+    s.address && `- 주소: ${s.address}`,
+    `- 예약 조회·수정: ${origin}/lookup`,
+  ].filter(Boolean).join("\n");
+  const short = `[${s.pension_name}] 예약 접수 완료 · ${reservation.code} · ${reservation.check_in} ~ ${reservation.check_out} (${reservation.nights}박, ${reservation.guests}명)` + (s.contact_phone ? ` · 문의 ${s.contact_phone}` : "");
 
   return (
     <main className="max-w-lg mx-auto px-5 pb-16">

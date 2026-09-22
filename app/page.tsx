@@ -87,10 +87,10 @@ export default async function Home() {
 
       {settings.booking_paused && (
         <div className="max-w-5xl mx-auto px-5 mt-6">
-          <div className="card-surface p-5 border-2 border-amber-300 bg-amber-50/80">
-            <p className="text-sm font-bold text-amber-800">🌊 {settings.booking_pause_message || "현재 예약이 일시 중지되어 있습니다."}</p>
+          <div className="card-surface p-5 border-2 border-warning/40 bg-warning/10">
+            <p className="text-sm font-bold text-warning">🌊 {settings.booking_pause_message || "현재 예약이 일시 중지되어 있습니다."}</p>
             {settings.booking_resume_date && /^\d{4}-\d{2}-\d{2}$/.test(settings.booking_resume_date) && (
-              <p className="text-xs font-semibold text-amber-700 mt-1.5">예약은 {settings.booking_resume_date.replace(/-/g, ".")}부터 가능합니다.</p>
+              <p className="text-xs font-semibold text-warning mt-1.5">예약은 {settings.booking_resume_date.replace(/-/g, ".")}부터 가능합니다.</p>
             )}
           </div>
         </div>
@@ -135,7 +135,7 @@ export default async function Home() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-black flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-400 fill-amber-400" /> 손님이 남긴 후기
+                <Star className="w-5 h-5 text-warning fill-warning" /> 손님이 남긴 후기
               </h2>
               <span className="text-sm font-extrabold text-amber-500">★ {reviewAvg} <span className="text-muted-foreground font-medium">· {reviewCount}건</span></span>
             </div>
@@ -188,9 +188,9 @@ export default async function Home() {
         {/* ── 위치 · 주차 안내 ── */}
         {(settings.address || settings.map_link || settings.parking_info || settings.arrival_info) && (
           <section className="card-surface p-6">
-            <h3 className="font-black mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" /> 오시는 길
-            </h3>
+            <h2 className="text-xl font-black mb-3 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" /> 오시는 길
+            </h2>
             <div className="space-y-2.5 text-sm">
               {/* 라벨-값 인접 좌측 정렬: 긴 주소도 왼쪽 기준 자연 줄바꿈 (break-keep) */}
               {settings.address && (

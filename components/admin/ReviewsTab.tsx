@@ -85,7 +85,7 @@ export default function ReviewsTab() {
                     title={r.visible ? "숨기기" : "노출하기"}>
                     {r.visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                  <button className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-rose-50 hover:text-danger" onClick={() => remove(r)} title="삭제">
+                  <button className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-danger/10 hover:text-danger" onClick={() => remove(r)} title="삭제">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

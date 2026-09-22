@@ -171,7 +171,7 @@ export default function ReservationForm({ price, maxGuests }: Props) {
       )}
 
       {overNights > 0 && blockedNights === 0 && (
-        <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 text-warning px-4 py-3 text-sm font-medium">
+        <div className="flex items-start gap-2 rounded-xl bg-warning/10 border border-warning/20 text-warning px-4 py-3 text-sm font-medium">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
           선택한 기간 중 {overNights}박이 수용 인원({maxGuests}명)을 초과합니다. 관리자 확인 후 거절될 수 있어요.
         </div>
