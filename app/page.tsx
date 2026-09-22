@@ -48,14 +48,16 @@ export default async function Home() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
         <div className="relative max-w-5xl mx-auto w-full px-5 pb-12 pt-24 text-white">
-          <span className="badge bg-white/15 backdrop-blur text-white border border-white/20">
-            <HomeIcon className="w-3.5 h-3.5" /> 집 전체 대여 · 방 선택 없이 자유롭게
-          </span>
-          <h1 className="mt-4 text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
+          {/* 중복 배지 제거 (소개 섹션의 '집 전체 통대여'와 중복) — 제목 + 블러 소개칩만 남김 */}
+          <h1 className="text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight drop-shadow">
             {settings.pension_name}
           </h1>
-          <p className="mt-3 text-base sm:text-xl font-medium text-white/90 drop-shadow">
-            {settings.tagline}
+          {/* 한줄소개 블러칩: inline-flex라 글자 길이에 따라 배경(블러)이 항상 맞춰 조정 — 관리자 수정 즉시 대응 */}
+          <p className="mt-3">
+            <span className="inline-flex items-start gap-2 max-w-full rounded-xl bg-white/15 backdrop-blur border border-white/20 px-3.5 py-2 text-left">
+              <HomeIcon className="w-4 h-4 mt-0.5 shrink-0" />
+              <span className="text-base sm:text-xl font-medium leading-relaxed">{settings.tagline}</span>
+            </span>
           </p>
           {/* CTA: 가격 칩과 예약하기 버튼 — 그리드 2등분으로 가로폭 완전 동일, 세로 48px, 글자 중앙정렬 */}
           <div className="mt-6 grid [grid-template-columns:repeat(2,minmax(0,1fr))] gap-2.5 w-full max-w-sm">
@@ -89,7 +91,7 @@ export default async function Home() {
         {/* ── 갤러리 ── */}
         <section>
           <h2 className="text-xl font-black flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-primary" /> 라온하우 둘러보기
+            <Sparkles className="w-5 h-5 text-primary" /> {settings.pension_name} 둘러보기
           </h2>
           <PhotoGallery photos={galleryPhotos.length ? galleryPhotos : photos} />
         </section>

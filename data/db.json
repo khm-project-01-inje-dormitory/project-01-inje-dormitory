@@ -379,6 +379,44 @@
       "refund_status": "none",
       "created_at": "2026-09-21T15:38:09.766Z",
       "updated_at": "2026-09-21T15:38:09.766Z"
+    },
+    {
+      "id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+      "code": "PB-YZV6",
+      "guest_name": "수정테스트",
+      "phone": "010-7777-5555",
+      "check_in": "2026-10-26",
+      "check_out": "2026-10-28",
+      "nights": 2,
+      "guests": 2,
+      "per_person_price": 30000,
+      "total_amount": 120000,
+      "depositor": "수정테스트",
+      "message": "",
+      "status": "confirmed",
+      "refund_status": "none",
+      "deleted_at": "2026-09-22T09:01:26.700Z",
+      "created_at": "2026-09-22T09:01:26.635Z",
+      "updated_at": "2026-09-22T09:01:26.700Z"
+    },
+    {
+      "id": "b0a9e4ce-d8d8-4686-b7c7-1c5fa9e3654e",
+      "code": "PB-USP5",
+      "guest_name": "검증테스트",
+      "phone": "010-6666-4444",
+      "check_in": "2026-11-03",
+      "check_out": "2026-11-05",
+      "nights": 2,
+      "guests": 2,
+      "per_person_price": 30000,
+      "total_amount": 120000,
+      "depositor": "검증테스트",
+      "message": "",
+      "status": "pending",
+      "refund_status": "none",
+      "deleted_at": "2026-09-22T09:58:35.058Z",
+      "created_at": "2026-09-22T09:58:35.019Z",
+      "updated_at": "2026-09-22T09:58:35.058Z"
     }
   ],
   "photos": [
@@ -455,5 +493,170 @@
       "created_at": "2026-09-06T15:38:09.613Z"
     }
   ],
-  "push_subscriptions": []
+  "push_subscriptions": [],
+  "audit_logs": [
+    {
+      "id": "3d87d029-48b3-4c43-b10e-7d001d36767b",
+      "actor": "admin",
+      "action": "edit",
+      "target_id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+      "target_label": "PB-YZV6",
+      "before": {
+        "check_in": "2026-10-25",
+        "check_out": "2026-10-27",
+        "guests": 3,
+        "total": 180000
+      },
+      "after": {
+        "check_in": "2026-10-26",
+        "check_out": "2026-10-29",
+        "guests": 5,
+        "total": 450000,
+        "refund_needed": false
+      },
+      "created_at": "2026-09-22T09:01:26.657Z"
+    },
+    {
+      "id": "8f9b8f25-3dc5-4471-867a-ca861be7b213",
+      "actor": "admin",
+      "action": "guest_edit",
+      "target_id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+      "target_label": "PB-YZV6",
+      "before": {
+        "check_in": "2026-10-26",
+        "check_out": "2026-10-29",
+        "guests": 5,
+        "total": 450000
+      },
+      "after": {
+        "check_in": "2026-10-25",
+        "check_out": "2026-10-27",
+        "guests": 2,
+        "total": 120000
+      },
+      "created_at": "2026-09-22T09:01:26.669Z"
+    },
+    {
+      "id": "29de669e-0281-4d08-8813-27aeaa461aa0",
+      "actor": "admin",
+      "action": "edit",
+      "target_id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+      "target_label": "PB-YZV6",
+      "before": {
+        "check_in": "2026-10-25",
+        "check_out": "2026-10-27",
+        "guests": 2,
+        "total": 120000
+      },
+      "after": {
+        "check_in": "2026-10-26",
+        "check_out": "2026-10-28",
+        "guests": 2,
+        "total": 120000,
+        "refund_needed": false
+      },
+      "created_at": "2026-09-22T09:01:26.686Z"
+    },
+    {
+      "id": "90921537-d7fd-43c8-8b28-881e0afb4ea8",
+      "actor": "admin",
+      "action": "hide",
+      "target_id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+      "target_label": "PB-YZV6",
+      "before": {
+        "id": "711549ce-3dd1-4bfa-8de0-a1143a6b0a3a",
+        "code": "PB-YZV6",
+        "guest_name": "수정테스트",
+        "phone": "010-7777-5555",
+        "check_in": "2026-10-26",
+        "check_out": "2026-10-28",
+        "nights": 2,
+        "guests": 2,
+        "per_person_price": 30000,
+        "total_amount": 120000,
+        "depositor": "수정테스트",
+        "message": "",
+        "status": "confirmed",
+        "refund_status": "none",
+        "deleted_at": null,
+        "created_at": "2026-09-22T09:01:26.635Z",
+        "updated_at": "2026-09-22T09:01:26.685Z"
+      },
+      "after": {
+        "deleted_at": "2026-09-22T09:01:26.702Z"
+      },
+      "created_at": "2026-09-22T09:01:26.702Z"
+    },
+    {
+      "id": "bd09d1b2-465e-4066-9e19-73fd5f98bf06",
+      "actor": "admin",
+      "action": "edit",
+      "target_id": "b0a9e4ce-d8d8-4686-b7c7-1c5fa9e3654e",
+      "target_label": "PB-USP5",
+      "before": {
+        "check_in": "2026-11-03",
+        "check_out": "2026-11-05",
+        "guests": 4,
+        "total": 240000
+      },
+      "after": {
+        "check_in": "2026-11-04",
+        "check_out": "2026-11-07",
+        "guests": 6,
+        "total": 540000,
+        "refund_needed": false
+      },
+      "created_at": "2026-09-22T09:58:35.046Z"
+    },
+    {
+      "id": "0bfb0550-3b1f-4e43-b5fd-2611b205daa6",
+      "actor": "admin",
+      "action": "guest_edit",
+      "target_id": "b0a9e4ce-d8d8-4686-b7c7-1c5fa9e3654e",
+      "target_label": "PB-USP5",
+      "before": {
+        "check_in": "2026-11-04",
+        "check_out": "2026-11-07",
+        "guests": 6,
+        "total": 540000
+      },
+      "after": {
+        "check_in": "2026-11-03",
+        "check_out": "2026-11-05",
+        "guests": 2,
+        "total": 120000
+      },
+      "created_at": "2026-09-22T09:58:35.053Z"
+    },
+    {
+      "id": "78572182-c3d2-46f7-bb20-dbd8fc0d0670",
+      "actor": "admin",
+      "action": "hide",
+      "target_id": "b0a9e4ce-d8d8-4686-b7c7-1c5fa9e3654e",
+      "target_label": "PB-USP5",
+      "before": {
+        "id": "b0a9e4ce-d8d8-4686-b7c7-1c5fa9e3654e",
+        "code": "PB-USP5",
+        "guest_name": "검증테스트",
+        "phone": "010-6666-4444",
+        "check_in": "2026-11-03",
+        "check_out": "2026-11-05",
+        "nights": 2,
+        "guests": 2,
+        "per_person_price": 30000,
+        "total_amount": 120000,
+        "depositor": "검증테스트",
+        "message": "",
+        "status": "pending",
+        "refund_status": "none",
+        "deleted_at": null,
+        "created_at": "2026-09-22T09:58:35.019Z",
+        "updated_at": "2026-09-22T09:58:35.052Z"
+      },
+      "after": {
+        "deleted_at": "2026-09-22T09:58:35.060Z"
+      },
+      "created_at": "2026-09-22T09:58:35.060Z"
+    }
+  ]
 }

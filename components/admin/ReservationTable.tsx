@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Search, X } from "lucide-react";
+import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X } from "lucide-react";
+import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
 
@@ -32,6 +33,7 @@ export default function ReservationTable({
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [editTarget, setEditTarget] = useState<Reservation | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // CSV 내보내기 기간 (기본: 3개월 전 ~ 6개월 후)
@@ -208,6 +210,11 @@ export default function ReservationTable({
                       </button>
                     )}
                     {(r.status === "pending" || r.status === "confirmed") && (
+                      <button className="btn-outline !py-2 !px-4 text-sm" onClick={() => setEditTarget(r)}>
+                        <Pencil className="w-4 h-4" /> 수정
+                      </button>
+                    )}
+                    {(r.status === "pending" || r.status === "confirmed") && (
                       <button className="btn-outline !py-2 !px-4 text-sm" onClick={() => copyNotice(r)}>
                         {copiedId === r.id ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                         {copiedId === r.id ? "복사 완료!" : "안내문 복사"}
@@ -216,6 +223,7 @@ export default function ReservationTable({
                   </>
                 )}
               </div>
+{editTarget?.id === r.id && <EditReservationDialog reservation={r} onClose={() => setEditTarget(null)} onSaved={load} />}
             </div>
           ))}
         </div>

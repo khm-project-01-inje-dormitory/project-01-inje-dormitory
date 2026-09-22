@@ -24,6 +24,13 @@ export default function LookupPage() {
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // 예약 수정 상태 (입금대기 예약만 — 입금확정 후에는 수정 불가 정책)
+  const [editTarget, setEditTarget] = useState<Reservation | null>(null);
+  const [editIn, setEditIn] = useState("");
+  const [editOut, setEditOut] = useState("");
+  const [editGuests, setEditGuests] = useState("");
+  const [editBusy, setEditBusy] = useState(false);
+  const [editMsg, setEditMsg] = useState("");
 
   // 후기 작성 상태
   const [reviewCode, setReviewCode] = useState<string | null>(null);
@@ -67,6 +74,34 @@ export default function LookupPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
       setLoading(false);
+    }
+  }
+
+  const editNights = (a: string, b: string) =>
+    Math.max(0, Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000));
+
+  /** 예약자 수정 — pending만, 서버에서 정원/휴무일 재검증 + 관리자 푸시 발송 */
+  async function saveEdit() {
+    if (!editTarget) return;
+    const g = Number(editGuests) || 0;
+    const n = editNights(editIn, editOut);
+    if (n < 1) return setEditMsg("체크아웃은 체크인 다음 날이어야 합니다.");
+    if (g < 1) return setEditMsg("투숙 인원을 확인해 주세요.");
+    if (!confirm(`예약을 수정할까요?\n→ ${editIn} ~ ${editOut} · ${n}박 · ${g}명\n총액 ${(editTarget.per_person_price * g * n).toLocaleString()}원`)) return;
+    setEditBusy(true); setEditMsg("");
+    try {
+      const res = await fetch("/api/reservations/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editTarget.id, phone: phone.trim(), check_in: editIn, check_out: editOut, guests: g }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "수정 실패");
+      setEditTarget(null);
+      await lookup();
+    } catch (e) {
+      setEditMsg(e instanceof Error ? e.message : "수정 실패");
+      setEditBusy(false);
     }
   }
 
@@ -146,9 +181,39 @@ export default function LookupPage() {
                 </dl>
 
                 {cancellable && (
-                  <button className="btn-danger w-full mt-4" onClick={() => cancel(r)} disabled={loading}>
-                    이 예약 취소하기
-                  </button>
+                  <div className="flex gap-2 mt-4">
+                    {r.status === "pending" && (
+                      <button className="btn-outline flex-1" onClick={() => { setEditTarget(r); setEditIn(r.check_in); setEditOut(r.check_out); setEditGuests(String(r.guests)); setEditMsg(""); }}>
+                        날짜·인원 수정
+                      </button>
+                    )}
+                    <button className="btn-danger flex-1" onClick={() => cancel(r)} disabled={loading}>
+                      이 예약 취소하기
+                    </button>
+                  </div>
+                )}
+
+                {/* 수정 폼 — 입금대기 예약만 노출 */}
+                {editTarget?.id === r.id && (
+                  <div className="mt-3 rounded-xl border border-primary/20 bg-primary-soft/40 p-4 space-y-3">
+                    <p className="text-sm font-bold">예약 수정 <span className="text-muted-foreground font-medium">입금 확인 전까지 자유롭게 변경할 수 있어요</span></p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div><label className="label">체크인</label><input type="date" className="input" value={editIn} onChange={(e) => setEditIn(e.target.value)} /></div>
+                      <div><label className="label">체크아웃</label><input type="date" className="input" value={editOut} onChange={(e) => setEditOut(e.target.value)} /></div>
+                    </div>
+                    <div><label className="label">투숙 인원</label>
+                      <input type="text" inputMode="numeric" className="input max-w-[110px]" value={editGuests} onChange={(e) => setEditGuests(e.target.value.replace(/\D/g, "").slice(0, 3))} />
+                    </div>
+                    <div className="flex justify-between text-sm bg-white/70 rounded-lg px-3 py-2">
+                      <span className="text-muted-foreground">{editNights(editIn, editOut)}박 · {Number(editGuests) || 0}명</span>
+                      <b className="text-primary tabular-nums">{fmtWon(editTarget.per_person_price * (Number(editGuests) || 0) * editNights(editIn, editOut))}</b>
+                    </div>
+                    {editMsg && <p className="text-xs font-semibold text-danger">{editMsg}</p>}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button className="btn-primary !py-2.5 text-sm" onClick={saveEdit} disabled={editBusy}>{editBusy ? "저장 중…" : "수정 저장"}</button>
+                      <button className="btn-soft !py-2.5 text-sm" onClick={() => setEditTarget(null)}>그만두기</button>
+                    </div>
+                  </div>
                 )}
                 {r.status === "pending" && (
                   <p className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-semibold text-warning">
