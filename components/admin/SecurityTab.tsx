@@ -128,7 +128,7 @@ export default function SecurityTab() {
           <div className="flex items-start gap-2 rounded-xl bg-warning/10 border border-warning/20 text-warning px-4 py-3 text-sm font-medium">
             <TriangleAlert className="w-4 h-4 mt-0.5 shrink-0" />
             <span className="break-keep leading-relaxed">
-              이메일 발송 설정이 필요합니다 — Vercel 환경변수에 <span className="font-bold whitespace-nowrap">RESEND_API_KEY</span>를 추가한 뒤 다시 시도해 주세요.
+              이메일 발송 설정이 필요합니다 — Vercel 환경변수에 <span className="font-bold whitespace-nowrap">GMAIL_USER</span>와 <span className="font-bold whitespace-nowrap">GMAIL_APP_PASSWORD</span>를 추가한 뒤 다시 시도해 주세요.
             </span>
           </div>
         )}

@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "이메일 형식이 올바르지 않습니다." }, { status: 400 });
   if (!EMAIL_CONFIGURED)
     return NextResponse.json(
-      { error: "이메일 발송 설정이 필요합니다. Vercel 환경변수에 RESEND_API_KEY를 추가한 뒤 다시 시도해 주세요." },
+      { error: "이메일 발송 설정이 필요합니다. Vercel 환경변수에 GMAIL_USER와 GMAIL_APP_PASSWORD를 추가한 뒤 다시 시도해 주세요." },
       { status: 400 }
     );
 
