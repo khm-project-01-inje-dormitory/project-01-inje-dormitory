@@ -68,11 +68,12 @@ export default async function Home() {
               <span className="text-base font-black text-primary tabular-nums">{fmtWon(settings.per_person_price)}</span>
             </div>
             {settings.booking_paused ? (
-              <div className="flex-1 h-12 rounded-xl bg-white/25 text-white inline-flex items-center justify-center gap-2 text-sm font-bold backdrop-blur cursor-not-allowed border border-white/30">
+              <div className="h-12 !px-6 rounded-xl bg-white/25 text-white inline-flex items-center justify-center gap-2 text-sm font-bold backdrop-blur cursor-not-allowed border border-white/30 shrink-0 whitespace-nowrap">
                 예약 일시 중지
               </div>
             ) : (
-              <Link href="/reserve" className="btn-primary flex-1 h-12 !py-0 !rounded-xl !text-base">
+              // flex-1 제거 → 내용에 맞는 자동 폭(고정 패딩) — 하단 고정바에 CTA가 있어 히어로 버튼은 컴팩트하게
+              <Link href="/reserve" className="btn-primary h-12 !py-0 !rounded-xl !text-base !px-6 sm:!px-8 shrink-0 whitespace-nowrap">
                 예약하기 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
