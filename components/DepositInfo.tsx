@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Link2, MessageCircle } from "lucide-react";
+import { Check, Copy, Link2 } from "lucide-react";
 
 /**
- * 입금 안내 카드 — 계좌 복사 + 카카오페이/토스 앱 연동
- * 토스: 공식 송금 딥링크(supertoss://send)로 금액까지 미리 채움
- * 카카오페이: 개인 송금 딥링크가 없어 계좌 복사 후 앱을 열어주는 방식
+ * 입금 안내 카드 — 계좌 복사 + 토스 송금 연동
+ * 토스: 공식 송금 딥링크(supertoss://send)로 은행·계좌·금액까지 미리 채움
+ * (카카오페이는 개인 계좌 송금 딥링크가 공식 제공되지 않아 오류 이슈 → 제거, 2026-09)
  */
 export default function DepositInfo({
   bank,
@@ -50,20 +50,11 @@ export default function DepositInfo({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <button className="btn-outline" onClick={copyAccount}>
           {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
           {copied ? "복사 완료!" : "계좌 복사"}
         </button>
-        {/* 카카오페이: 복사 후 앱 오픈 */}
-        <a
-          className="btn w-full bg-[#ffe812] text-[#181600] hover:brightness-105"
-          onClick={copyAccount}
-          href="kakaopay://"
-        >
-          <MessageCircle className="w-4 h-4" />
-          카카오페이로 송금
-        </a>
         {/* 토스: 딥링크로 은행/계좌/금액 미리 채움 */}
         {/* 토스 브랜드 고정색 — 디자인 토큰 예외 (브랜드 가이드) */}
         <a className="btn w-full bg-[#3182f6] text-white hover:brightness-110" href={tossLink}>
@@ -72,8 +63,8 @@ export default function DepositInfo({
         </a>
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">
-        카카오페이·토스 버튼은 스마트폰에서 해당 앱이 설치된 경우 바로 연결됩니다.
-        앱이 열리지 않으면 <b>계좌 복사</b> 후 카카오페이·토스 앱에서 붙여넣어 송금해 주세요.
+        토스 버튼은 스마트폰에서 토스 앱이 설치된 경우 은행·계좌·금액이 채워진 송금 화면으로 바로 연결됩니다.
+        앱이 열리지 않으면 <b>계좌 복사</b> 후 토스 앱에서 붙여넣어 송금해 주세요.
         입금자명이 다르면 입금 확인이 지연될 수 있으니 위 입력하신 입금자명으로 보내주세요.
       </p>
     </div>

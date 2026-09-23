@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "펜션 예약 — 집 전체를 통째로",
   description:
     "방을 고르지 않아도 됩니다. 1인당 요금만 내면 집 전체에서 자유롭게 머무는 펜션 예약 서비스.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "펜션 예약", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
 };

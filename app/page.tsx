@@ -103,7 +103,7 @@ export default async function Home() {
           {([
             { show: settings.feature1_visible !== false, icon: <HomeIcon className="w-5 h-5" />, title: settings.feature1_title || "집 전체 통대여", body: settings.feature1_body || settings.tagline || "도착하시면 집 안 어느 방에서든 자유롭게 머무실 수 있습니다." },
             { show: settings.feature2_visible !== false, icon: <Users className="w-5 h-5" />, title: settings.feature2_title || `최대 ${settings.max_guests}명`, body: settings.feature2_body || "인원 단위 예약으로 가족·친구 모임에 딱 맞습니다." },
-            { show: settings.feature3_visible !== false, icon: <Banknote className="w-5 h-5" />, title: settings.feature3_title || "간편 입금 결제", body: settings.feature3_body || "카카오페이·토스로 바로 송금하세요. 카드 결제 없음." },
+            { show: settings.feature3_visible !== false, icon: <Banknote className="w-5 h-5" />, title: settings.feature3_title || "간편 입금 결제", body: settings.feature3_body || "토스로 바로 송금하세요. 카드 결제 없음." },
           ] as const).filter((f) => f.show).filter((f) => f.show).map((f) => (
             <div key={f.title} className="card-surface p-5">
               <div className="w-10 h-10 rounded-xl bg-primary-soft text-primary flex items-center justify-center">{f.icon}</div>
@@ -175,7 +175,7 @@ export default async function Home() {
             <ol className="space-y-2.5 text-sm">
               {[
                 "날짜·인원을 선택해 예약을 신청합니다.",
-                "안내된 계좌로 카카오페이/토스로 송금합니다.",
+                "안내된 계좌로 토스로 송금합니다.",
                 "관리자가 입금을 확인하면 예약이 확정됩니다.",
               ].map((s, i) => (
                 <li key={i} className="flex gap-2.5">

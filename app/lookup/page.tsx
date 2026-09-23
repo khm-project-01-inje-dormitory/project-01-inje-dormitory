@@ -211,16 +211,11 @@ export default function LookupPage() {
                   <div className="mt-4 space-y-2">
                     <ShareReservation text={buildNotice(r, typeof window !== "undefined" ? window.location.origin : "")} short={shortNotice(r)} />
                     {r.status === "pending" && settings?.bank_name && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <button className="btn w-full bg-[#ffe812] text-[#181600] hover:brightness-105"
-                          onClick={async () => { try { await navigator.clipboard.writeText(`${settings.bank_name} ${settings.account_number} ${settings.account_holder}`); } catch {} window.location.href = "kakaopay://"; }}>
-                          💳 카카오페이
-                        </button>
-                        <a className="btn w-full bg-[#3182f6] text-white hover:brightness-110"
-                          href={`supertoss://send?bank=${encodeURIComponent(settings.bank_name)}&accountNo=${encodeURIComponent(settings.account_number.replace(/-/g, ""))}&amount=${r.total_amount}`}>
-                          토스 송금
-                        </a>
-                      </div>
+                      // 토스 단독 — 카카오페이는 개인 계좌 송금 딥링크 미제공으로 오류 이슈 → 제거 (2026-09)
+                      <a className="btn w-full bg-[#3182f6] text-white hover:brightness-110"
+                        href={`supertoss://send?bank=${encodeURIComponent(settings.bank_name)}&accountNo=${encodeURIComponent(settings.account_number.replace(/-/g, ""))}&amount=${r.total_amount}`}>
+                        토스 송금
+                      </a>
                     )}
                   </div>
                 )}

@@ -39,11 +39,11 @@ export default function AdminLoginPage() {
         </div>
         <h1 className="text-xl font-black text-center mt-4">관리자 로그인</h1>
         <input
-          type="password" className="input mt-6 text-center tracking-widest" placeholder="비밀번호"
+          type="password" className="input mt-6 text-center tracking-widest !text-foreground font-bold placeholder:font-normal placeholder:text-muted-foreground" placeholder="비밀번호"
           value={password} onChange={(e) => setPassword(e.target.value)} autoFocus
         />
         {error && <p className="text-sm font-semibold text-danger mt-3 text-center">{error}</p>}
-        <button type="submit" className="btn-primary w-full mt-4" disabled={loading || !password}>
+        <button type="submit" className="btn-primary w-full mt-4 !text-primary-foreground font-black" disabled={loading || !password}>
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "로그인"}
         </button>
       </form>

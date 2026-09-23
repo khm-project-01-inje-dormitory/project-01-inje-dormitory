@@ -317,7 +317,7 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
       </div>
       {/* 입금 계좌 */}
       <div className="card-surface p-5 space-y-4">
-        <h3 className="font-bold text-sm text-muted-foreground">입금 계좌 (카카오페이/토스 송금 버튼에 사용)</h3>
+        <h3 className="font-bold text-sm text-muted-foreground">입금 계좌 (토스 송금 버튼에 사용)</h3>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="label">은행</label>

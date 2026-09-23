@@ -205,7 +205,7 @@ export default function ReservationForm({ price, maxGuests, autoCloseOverbook }:
           <span className="text-2xl font-extrabold text-primary tabular-nums">{fmtWon(total)}</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          카드 결제 없음 · 안내된 계좌로 카카오페이/토스/은행앱 송금 후 관리자가 입금을 확인하면 예약이 확정됩니다.
+          카드 결제 없음 · 안내된 계좌로 토스/은행앱 송금 후 관리자가 입금을 확인하면 예약이 확정됩니다.
         </p>
         {error && <p className="mt-3 text-sm font-semibold text-danger">{error}</p>}
         <button className="btn-primary w-full mt-4 !py-4 text-base" onClick={submit} disabled={submitting || nights < 1 || blockedNights > 0}>
