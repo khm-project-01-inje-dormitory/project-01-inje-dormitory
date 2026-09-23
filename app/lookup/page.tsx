@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, Star } from "lucide-react";
+import { ArrowLeft, Check, Copy, Search, Star } from "lucide-react";
 import { fmtDateKorean, fmtWon } from "@/lib/format";
 import { STATUS_LABEL, type Reservation, type ReservationStatus, type Settings } from "@/types";
 import ShareReservation from "@/components/ShareReservation";
@@ -45,6 +45,13 @@ export default function LookupPage() {
   const [reviewMsg, setReviewMsg] = useState("");
   const [reviewedCodes, setReviewedCodes] = useState<Set<string>>(new Set());
 
+  // 후기 요청 링크(?code=PB-XXXX) — 조회 후 해당 예약의 후기 폼 자동 오픈
+  const [deepLinkCode, setDeepLinkCode] = useState("");
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("code");
+    if (c) setDeepLinkCode(c.trim().toUpperCase());
+  }, []);
+
   async function lookup() {
     setError(""); setNotFound(false); setLoading(true);
     try {
@@ -57,7 +64,10 @@ export default function LookupPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "조회 중 오류가 발생했습니다.");
       setResults(data.reservations);
-      setReviewCode(null); setRating(0); setComment(""); setReviewMsg("");
+      setRating(0); setComment(""); setReviewMsg("");
+      // 후기 요청 링크로 진입한 경우 — 해당 투숙완료 예약의 후기 폼을 바로 열어줌
+      const target = (data.reservations as Reservation[]).find((x) => x.code.toUpperCase() === deepLinkCode && x.status === "completed");
+      setReviewCode(target ? target.code : null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
     } finally {
@@ -207,6 +217,17 @@ export default function LookupPage() {
                   <div className="flex justify-between"><dt className="text-muted-foreground">금액</dt><dd className="font-extrabold text-primary">{fmtWon(r.total_amount)}</dd></div>
                 </dl>
 
+                {r.status === "pending" && settings?.bank_name && (
+                  <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-primary-soft border border-primary/10 px-4 py-3">
+                    <div className="text-sm min-w-0">
+                      <span className="font-bold">{settings.bank_name}</span>
+                      <span className="tabular-nums ml-2">{settings.account_number}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{settings.account_holder}</span>
+                    </div>
+                    <AccountChip bank={settings.bank_name} account={settings.account_number} holder={settings.account_holder} />
+                  </div>
+                )}
+
                 {shareable && (
                   <div className="mt-4 space-y-2">
                     <ShareReservation text={buildNotice(r, typeof window !== "undefined" ? window.location.origin : "")} short={shortNotice(r)} />
@@ -299,5 +320,29 @@ export default function LookupPage() {
         </div>
       )}
     </main>
+  );
+}
+
+/** 입금 계좌 칩 — 클릭 시 은행·계좌·예금주를 한 번에 복사 */
+function AccountChip({ bank, account, holder }: { bank: string; account: string; holder: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label="계좌 복사"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(`${bank} ${account} ${holder}`);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch { /* 클립보드 권한 없음 */ }
+      }}
+      className={`shrink-0 inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-bold transition active:scale-95 ${
+        copied ? "bg-success/10 text-success border-success/20" : "bg-background text-foreground border-border hover:bg-muted"
+      }`}
+    >
+      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+      {copied ? "복사됨" : "복사"}
+    </button>
   );
 }

@@ -102,6 +102,11 @@ export default async function ReserveDonePage({
         <Link href="/lookup" className="btn-outline">예약 조회·취소</Link>
         <Link href="/" className="btn-primary"><Home className="w-4 h-4" /> 홈으로</Link>
       </div>
+      <p className="mt-4 text-xs text-muted-foreground text-center leading-relaxed">
+        💡 이 페이지를 즐겨찾기하거나 홈화면에 추가해 두시면 투숙 후{" "}
+        <Link href="/lookup" className="font-bold text-primary underline underline-offset-2">예약 조회</Link>에서
+        후기 작성이 쉬워집니다.
+      </p>
     </main>
   );
 }

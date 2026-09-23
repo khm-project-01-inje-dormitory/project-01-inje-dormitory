@@ -50,6 +50,22 @@ export default function ReservationTable({
   const setSortKey = (v: typeof sortKey) => { setSortKeyRaw(v); savePref("sort", v); setVisibleRaw(20); };
   const setQ = (v: string) => { setQRaw(v); savePref("q", v); };
 
+  /** 후기 요청 메시지 복사 — 투숙완료 건, 카톡에 붙여넣어 손님에게 전달 */
+  async function copyReviewAsk(r: Reservation) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const msg = [
+      `[${settings?.pension_name ?? "펜션"}] 이용해주셔서 감사합니다 🙏`,
+      `${r.guest_name}님, 즐거우셨다면 한 줄 후기를 남겨주세요!`,
+      `→ ${origin}/lookup?code=${r.code}`,
+      `(이름·연락처로 조회하시면 후기 입력창이 바로 열립니다)`,
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(msg);
+      setCopiedId(r.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch { /* 클립보드 권한 없음 */ }
+  }
+
   /** 숨김 예약 복원 — 복원 시점에 해당 기간 정원 재검사해 초과면 경고 */
   async function restoreHidden(r: Reservation) {
     const nights: string[] = [];
@@ -333,6 +349,11 @@ export default function ReservationTable({
                     {r.status === "confirmed" && (
                       <button className="btn-outline !py-2 !px-4 text-sm" onClick={() => patch(r.id, { status: "completed" }, "투숙 완료로 처리하시겠습니까?")}>
                         투숙완료
+                      </button>
+                    )}
+                    {r.status === "completed" && (
+                      <button className="btn-outline !py-2 !px-4 text-sm" onClick={() => copyReviewAsk(r)}>
+                        <Copy className="w-4 h-4" /> 후기 요청 복사
                       </button>
                     )}
                     {(r.status === "confirmed" || r.status === "pending") && (

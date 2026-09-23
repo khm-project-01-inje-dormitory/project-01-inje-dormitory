@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 import { notifyAdmins } from "@/lib/push";
-import { fmtDateKorean, fmtWon, todayKST } from "@/lib/format";
+import { addDays, fmtDateKorean, fmtWon, todayKST } from "@/lib/format";
 
 // 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
 export const dynamic = "force-dynamic";
@@ -44,6 +44,10 @@ async function handle(req: Request) {
   );
   if (checkouts.length) parts.push(`체크아웃 ${checkouts.length}건 — ${checkouts.map((r) => r.guest_name).join(", ")}`);
   parts.push(pending.length ? `입금대기 ${pending.length}건 · ${fmtWon(summary.pendingAmount)}` : "입금대기 없음");
+
+  // 최근 2일 내 퇴실(투숙완료) 건 — 후기 요청 보낼 기회 알림
+  const finished = all.filter((r) => r.status === "completed" && r.check_out >= addDays(today, -2) && r.check_out < today);
+  if (finished.length) parts.push(`최근 퇴실 ${finished.length}건 — 예약관리에서 "후기 요청 복사"를 보내보세요`);
 
   await notifyAdmins(`🌅 아침 브리핑 · ${fmtDateKorean(today)}`, parts.join("\n"), "/admin");
   return NextResponse.json({ ok: true, summary, message: parts.join(" | ") });
