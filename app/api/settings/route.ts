@@ -9,7 +9,9 @@ export const fetchCache = "force-no-store";
 
 /** 공개: 숙소 정보/요금/계좌 (랜딩·예약 화면용) */
 export async function GET() {
-  return NextResponse.json({ settings: await store.getSettings() });
+  // 공개 응답 — 보안 필드(비밀번호 해시·관리자 이메일)는 노출 금지
+  const { admin_password_hash, admin_email, admin_email_verified, ...safe } = (await store.getSettings()) as unknown as Record<string, unknown>;
+  return NextResponse.json({ settings: safe });
 }
 
 const STR_LIMIT = 300;
@@ -35,6 +37,9 @@ export async function PATCH(req: Request) {
   for (const k of ["address", "map_link", "parking_info", "arrival_info"] as const) {
     if (body[k] !== undefined) body[k] = String(body[k]).trim().slice(0, STR_LIMIT);
   }
+
+  // 보안 필드는 전용 엔드포인트(보안 탭·복구 API)에서만 변경 — 설정 PATCH로 직접 조작 차단
+  for (const k of ["admin_password_hash", "admin_email", "admin_email_verified"] as const) delete body[k];
 
   const settings = await store.updateSettings(body);
   return NextResponse.json({ settings });

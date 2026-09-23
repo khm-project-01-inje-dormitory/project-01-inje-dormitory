@@ -13,7 +13,7 @@
   --primary-foreground: 255 253 250;
   --primary-soft: 251 243 230;     /* 연한 크림 배경 */
 
-  --background: 250 248 244;       /* 웜 화이트 */
+  --background: 246 242 236;       /* 웜 크림 — 순백 카드와 대비 확보 */
   --foreground: 41 37 36;
   --card: 255 255 255;
   --muted: 243 238 230;
@@ -34,10 +34,10 @@
   color-scheme: dark;
   --background: 28 25 21;
   --foreground: 236 231 222;
-  --card: 37 33 28;
-  --muted: 48 43 37;
+  --card: 43 38 32;
+  --muted: 52 47 40;
   --muted-foreground: 176 166 152;
-  --border: 59 53 45;
+  --border: 68 61 52;
   --ring: 232 181 106;
   --primary: 232 181 106;
   --primary-foreground: 41 37 36;
@@ -62,6 +62,11 @@ body {
 /* 공통 카드 스타일 */
 .card-surface {
   @apply bg-card border border-border rounded-card shadow-card;
+  /* 상단 하이라이트 — 카드 위쪽에 은은한 빛 반사로 입체감 */
+  box-shadow: var(--tw-shadow), inset 0 1px 0 0 rgb(255 255 255 / 0.5);
+}
+.dark .card-surface {
+  box-shadow: var(--tw-shadow), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
 }
 
 /* 입력 요소 공통 */

@@ -6,7 +6,7 @@ import "server-only";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE, SUPABASE_URL } from "./mode";
 import type {
-  BlockedDate, Photo, PushSubscriptionRow, Reservation, Review, Settings,
+  BlockedDate, EmailToken, Photo, PushSubscriptionRow, Reservation, Review, Settings,
 } from "@/types";
 
 let client: SupabaseClient | null = null;
@@ -54,6 +54,8 @@ const SETTINGS_SEED: Partial<Settings> = {
   arrival_info: "",
   booking_paused: false,
   admin_password_hash: "",
+  admin_email: "",
+  admin_email_verified: false,
   hero_badge_visible: true,
   booking_pause_message: "지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.",
   booking_resume_date: "",
@@ -234,6 +236,42 @@ export const supabaseStore = {
   async deletePushSubscription(endpoint: string): Promise<void> {
     await db().from("push_subscriptions").delete().eq("endpoint", endpoint);
   },
+  /** 관리자 이메일 인증·복구 토큰 */
+  async saveEmailToken(t: EmailToken): Promise<void> {
+    const { error } = await db().from("admin_email_tokens").insert({
+      id: t.id, email: t.email, token_hash: t.token_hash, purpose: t.purpose,
+      used: t.used, expires_at: t.expires_at, created_at: t.created_at,
+    });
+    if (error) throw error;
+  },
+  async listEmailTokens(email: string, purpose: string): Promise<EmailToken[]> {
+    const { data, error } = await db()
+      .from("admin_email_tokens")
+      .select("*")
+      .eq("email", email)
+      .eq("purpose", purpose)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    return (data ?? []) as EmailToken[];
+  },
+  async markEmailTokenUsed(id: string): Promise<void> {
+    const { error } = await db().from("admin_email_tokens").update({ used: true }).eq("id", id);
+    if (error) throw error;
+  },
+
+  /** 복구 토큰 전체 조회 — 로그인 전 요청이라 이메일을 특정할 수 없어 전체 대상 */
+  async listAllEmailTokens(purpose: string): Promise<EmailToken[]> {
+    const { data, error } = await db()
+      .from("admin_email_tokens")
+      .select("*")
+      .eq("purpose", purpose)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return (data ?? []) as EmailToken[];
+  },
+
 };
 
 /** Storage 'photos' 버킷 업로드 (API route에서 multipart 파일 수신 후 호출) */

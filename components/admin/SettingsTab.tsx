@@ -8,11 +8,6 @@ import type { BlockedDate, Settings } from "@/types";
 /** 사이트 설정 — 요금/인원/휴무일/마감정책/위치·주차/계좌/소개 */
 export default function SettingsTab({ settings }: { settings: Settings }) {
   const [form, setForm] = useState<Settings>(settings);
-  const [pw, setPw] = useState({ cur: "", next: "", confirm: "" });
-  const [pwMsg, setPwMsg] = useState("");
-  const [pwOk, setPwOk] = useState(false);
-  const [pwBusy, setPwBusy] = useState(false);
-  const [pwOpen, setPwOpen] = useState(false);
   const [priceText, setPriceText] = useState(String(settings.per_person_price));
   const [maxGuestsText, setMaxGuestsText] = useState(String(settings.max_guests));
   const [saving, setSaving] = useState(false);
@@ -94,10 +89,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
     <div className="max-w-6xl space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-black">사이트 설정</h2>
-        <button type="button" onClick={() => setPwOpen(true)}
-          className="btn-outline !py-2 !px-3.5 text-xs inline-flex items-center gap-1.5 shrink-0 hover:scale-[1.03] active:scale-95 transition-transform">
-          <ShieldCheck className="w-3.5 h-3.5" /> 비밀번호 변경
-        </button>
       </div>
 
       {/* 예약 마감 정책 */}
@@ -353,42 +344,6 @@ export default function SettingsTab({ settings }: { settings: Settings }) {
         {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-4 h-4" />} 설정 저장
       </button>
 
-      {/* 비밀번호 변경 모달 — 설정 저장과 독립 동작 */}
-      {pwOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setPwOpen(false)}>
-          <div className="card-surface p-6 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="비밀번호 변경">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary" />
-              <h3 className="font-black">비밀번호 변경</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">변경 즉시 반영됩니다 (재배포 불필요). 환경변수 ADMIN_PASSWORD는 긴급 복구용으로 유지됩니다.</p>
-            <div className="space-y-3">
-              <div><label className="label">현재 비밀번호</label><input type="password" className="input" value={pw.cur} onChange={(e) => setPw({ ...pw, cur: e.target.value })} autoFocus /></div>
-              <div><label className="label">새 비밀번호 (8자 이상)</label><input type="password" className="input" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} /></div>
-              <div><label className="label">새 비밀번호 확인</label><input type="password" className="input" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} /></div>
-            </div>
-            {pwMsg && <p className={`text-xs font-bold ${pwOk ? "text-success" : "text-danger"}`}>{pwMsg}</p>}
-            <div className="grid grid-cols-2 gap-2">
-              <button type="button" className="btn-primary !py-2.5 text-sm" disabled={pwBusy || !pw.cur || !pw.next}
-                onClick={async () => {
-                  if (pw.next !== pw.confirm) { setPwOk(false); setPwMsg("새 비밀번호가 일치하지 않습니다."); return; }
-                  setPwBusy(true); setPwMsg("");
-                  try {
-                    const res = await fetch("/api/admin/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ current: pw.cur, next: pw.next }) });
-                    const d = await res.json();
-                    if (!res.ok) throw new Error(d.error || "변경 실패");
-                    setPwOk(true); setPwMsg("✓ 비밀번호가 변경되었습니다");
-                    setTimeout(() => { setPwOpen(false); setPwMsg(""); setPw({ cur: "", next: "", confirm: "" }); }, 1200);
-                  } catch (e) { setPwOk(false); setPwMsg(e instanceof Error ? e.message : "변경 중 오류가 발생했습니다."); }
-                  finally { setPwBusy(false); }
-                }}>
-                {pwBusy ? "저장 중…" : "변경"}
-              </button>
-              <button type="button" className="btn-soft !py-2.5 text-sm" onClick={() => { setPwOpen(false); setPwMsg(""); setPw({ cur: "", next: "", confirm: "" }); }}>취소</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

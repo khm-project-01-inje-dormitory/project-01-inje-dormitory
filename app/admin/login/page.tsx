@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Loader2, LockKeyhole } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -46,6 +47,10 @@ export default function AdminLoginPage() {
         <button type="submit" className="btn-primary w-full mt-4 !text-primary-foreground font-black" disabled={loading || !password}>
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "로그인"}
         </button>
+        <div className="mt-4 text-center text-xs text-muted-foreground">
+          비밀번호를 잊으셨나요?{" "}
+          <Link href="/admin/forgot" className="font-bold text-primary underline underline-offset-2">비밀번호 찾기</Link>
+        </div>
       </form>
     </main>
   );

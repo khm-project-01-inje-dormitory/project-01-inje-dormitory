@@ -157,3 +157,19 @@ alter table settings add column if not exists booking_resume_date text not null 
 
 -- 업그레이드: 관리자 비밀번호 해시 (빈 값이면 환경변수 ADMIN_PASSWORD 사용 — 긴급 복구 백도어)
 alter table settings add column if not exists admin_password_hash text not null default '';
+
+-- 업그레이드: 관리자 보안 — 인증된 이메일 + 비밀번호 복구 토큰 (이메일 찾기)
+alter table settings add column if not exists admin_email text not null default '';
+alter table settings add column if not exists admin_email_verified boolean not null default false;
+
+create table if not exists admin_email_tokens (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  token_hash text not null,
+  purpose text not null,          -- verify_email | recover
+  used boolean not null default false,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_email_tokens_lookup on admin_email_tokens (email, purpose);
+alter table admin_email_tokens enable row level security;

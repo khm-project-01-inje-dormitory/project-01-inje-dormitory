@@ -45,7 +45,8 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        card: "0 1px 3px rgb(16 12 8 / 0.06), 0 8px 24px rgb(16 12 8 / 0.06)",
+        card: "0 1px 2px rgb(16 12 8 / 0.07), 0 4px 12px rgb(16 12 8 / 0.05), 0 12px 32px rgb(16 12 8 / 0.05)",
+        "card-hover": "0 2px 4px rgb(16 12 8 / 0.08), 0 8px 20px rgb(16 12 8 / 0.07), 0 20px 44px rgb(16 12 8 / 0.07)",
         pop: "0 2px 8px rgb(16 12 8 / 0.10), 0 16px 40px rgb(16 12 8 / 0.12)",
       },
     },

@@ -8,7 +8,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { addDays, todayKST } from "./format";
 import type {
-  BlockedDate, Photo, PushSubscriptionRow, Reservation, Review, Settings,
+  BlockedDate, EmailToken, Photo, PushSubscriptionRow, Reservation, Review, Settings,
 } from "@/types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -22,12 +22,15 @@ interface DB {
   blocked_dates: BlockedDate[];
   reviews: Review[];
   push_subscriptions: PushSubscriptionRow[];
+  admin_email_tokens?: EmailToken[];
 }
 
 const DEFAULT_SETTINGS: Settings = {
   id: 1,
   booking_paused: false,
   admin_password_hash: "",
+  admin_email: "",
+  admin_email_verified: false,
   hero_badge_visible: true,
   booking_pause_message: "지금은 준비 중입니다 — 잠시 예약을 쉬어가는 시간을 갖고 있습니다. 곧 다시 찾아뵙겠습니다.",
   booking_resume_date: "",
@@ -180,6 +183,7 @@ async function readDB(): Promise<DB> {
     // 구버전 db.json 호환 (필드 자동 보강)
     cache.blocked_dates ??= [];
     cache.reviews ??= [];
+    cache.admin_email_tokens ??= [];
     return cache;
   } catch {
     cache = await initDB();
@@ -362,6 +366,38 @@ export const demoStore = {
       await writeDB(db);
     });
   },
+  /** 관리자 이메일 인증·복구 토큰 */
+  async saveEmailToken(t: EmailToken): Promise<void> {
+    return lock(async () => {
+      const db = await readDB();
+      db.admin_email_tokens = db.admin_email_tokens || [];
+      db.admin_email_tokens.push(t);
+      await writeDB(db);
+    });
+  },
+  async listEmailTokens(email: string, purpose: string): Promise<EmailToken[]> {
+    const db = await readDB();
+    return (db.admin_email_tokens || [])
+      .filter((t) => t.email === email && t.purpose === purpose)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, 20);
+  },
+  async markEmailTokenUsed(id: string): Promise<void> {
+    return lock(async () => {
+      const db = await readDB();
+      db.admin_email_tokens = db.admin_email_tokens || [];
+      const t = db.admin_email_tokens.find((x) => x.id === id);
+      if (t) t.used = true;
+      await writeDB(db);
+    });
+  },
+
+  /** 복구 토큰 전체 조회 — 로그인 전 요청이라 이메일을 특정할 수 없어 전체 대상 */
+  async listAllEmailTokens(purpose: string): Promise<EmailToken[]> {
+    const db = await readDB();
+    return (db.admin_email_tokens || []).filter((t) => t.purpose === purpose).slice(0, 50);
+  },
+
 };
 
 export type DemoStore = typeof demoStore;

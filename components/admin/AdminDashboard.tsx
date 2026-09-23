@@ -2,16 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  BarChart3, Banknote, CalendarCheck2, ExternalLink, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2, LogOut } from "lucide-react";
+  BarChart3, Banknote, CalendarCheck2, ExternalLink, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2, LogOut, ShieldCheck } from "lucide-react";
 import StatsTab from "./StatsTab";
 import ReservationTable from "./ReservationTable";
 import GalleryTab from "./GalleryTab";
 import ReviewsTab from "./ReviewsTab";
 import SettingsTab from "./SettingsTab";
+import SecurityTab from "./SecurityTab";
 import PushSetup from "@/components/PushSetup";
 import type { Settings } from "@/types";
 
-type Tab = "stats" | "reservations" | "deposits" | "gallery" | "reviews" | "settings";
+type Tab = "stats" | "reservations" | "deposits" | "gallery" | "reviews" | "settings" | "security";
 
 const TABS: Array<[Tab, string, typeof BarChart3]> = [
   ["stats", "통계", BarChart3],
@@ -20,6 +21,7 @@ const TABS: Array<[Tab, string, typeof BarChart3]> = [
   ["gallery", "갤러리", Images],
   ["reviews", "후기", MessageSquareQuote],
   ["settings", "설정", Settings2],
+  ["security", "보안", ShieldCheck],
 ];
 
 /** modeLabel은 서버(AdminPage)에서 계산해 전달 — 클라이언트 번들은 service key 환경변수를 볼 수 없어 항상 데모로 표시되는 버그 수정 */
@@ -128,6 +130,7 @@ export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
         {tab === "gallery" && <GalleryTab key={"g" + reloadKey} />}
         {tab === "reviews" && <ReviewsTab key={"rv" + reloadKey} />}
         {tab === "settings" && (settings ? <SettingsTab key={"s" + reloadKey} settings={settings} /> : <LoadingCard />)}
+        {tab === "security" && <SecurityTab />}
       </div>
     </main>
   );

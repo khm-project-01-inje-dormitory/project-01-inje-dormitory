@@ -61,6 +61,9 @@ export interface Settings {
   contact_phone: string;
   /** 관리자 비밀번호 해시 (salt:sha256) — 빈 값이면 환경변수 ADMIN_PASSWORD 사용 */
   admin_password_hash: string;
+  /** 비밀번호 찾기용 인증된 이메일 (미인증이면 복구 불가) */
+  admin_email: string;
+  admin_email_verified: boolean;
   check_in_time: string;
   check_out_time: string;
   /** 수용 인원 초과 신청 자동 차단 (false = 경고 후 접수) */
@@ -152,5 +155,16 @@ export interface AuditLog {
   target_label: string;   // 예약코드 등 (삭제돼도 식별 가능)
   before: string;         // 변경 전 스냅샷 (JSON)
   after: string;          // 변경 후 스냅샷 (JSON)
+  created_at: string;
+}
+
+/** 관리자 이메일 인증·복구 토큰 (해시만 저장 — 원본은 이메일/링크로만 전달) */
+export interface EmailToken {
+  id: string;
+  email: string;
+  token_hash: string;
+  purpose: "verify_email" | "recover";
+  used: boolean;
+  expires_at: string;
   created_at: string;
 }
