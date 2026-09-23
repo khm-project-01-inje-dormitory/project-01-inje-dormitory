@@ -86,6 +86,7 @@ export default function LookupPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "취소 중 오류가 발생했습니다.");
+      setEditTarget(null); setEditMsg(""); // 수정창이 열린 상태에서 취소 시 수정창도 함께 닫기
       await lookup(); // 목록 갱신
     } catch (e) {
       setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
@@ -256,13 +257,13 @@ export default function LookupPage() {
                   </div>
                 )}
 
-                {/* 수정 폼 — 입금대기 예약만 노출 */}
-                {editTarget?.id === r.id && (
+                {/* 수정 폼 — 입금대기 예약만 노출 (취소 등 상태가 바뀌면 즉시 닫힘) */}
+                {editTarget?.id === r.id && r.status === "pending" && (
                   <div className="mt-3 rounded-xl border border-primary/20 bg-primary-soft/40 p-4 space-y-3">
                     <p className="text-sm font-bold">예약 수정 <span className="text-muted-foreground font-medium">입금 확인 전까지 자유롭게 변경할 수 있어요</span></p>
                     <div className="grid grid-cols-2 gap-2">
-                      <div><label className="label">체크인</label><input type="date" className="input" value={editIn} onChange={(e) => setEditIn(e.target.value)} /></div>
-                      <div><label className="label">체크아웃</label><input type="date" className="input" value={editOut} onChange={(e) => setEditOut(e.target.value)} /></div>
+                      <div><label className="label">체크인</label><input type="date" className="input !px-2.5 !text-sm min-w-0" value={editIn} onChange={(e) => setEditIn(e.target.value)} /></div>
+                      <div><label className="label">체크아웃</label><input type="date" className="input !px-2.5 !text-sm min-w-0" value={editOut} onChange={(e) => setEditOut(e.target.value)} /></div>
                     </div>
                     <div><label className="label">투숙 인원</label>
                       <input type="text" inputMode="numeric" className="input max-w-[110px]" value={editGuests} onChange={(e) => setEditGuests(e.target.value.replace(/\D/g, "").slice(0, 3))} />
