@@ -218,13 +218,16 @@ export default function LookupPage() {
                 </dl>
 
                 {r.status === "pending" && settings?.bank_name && (
-                  <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-primary-soft border border-primary/10 px-4 py-3">
-                    <div className="text-sm min-w-0">
-                      <span className="font-bold">{settings.bank_name}</span>
-                      <span className="tabular-nums ml-2">{settings.account_number}</span>
-                      <span className="text-xs text-muted-foreground ml-2">{settings.account_holder}</span>
+                  <div className="mt-3 rounded-xl bg-primary-soft border border-primary/10 px-4 py-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">은행</span>
+                      <span className="font-bold">{settings.bank_name}({settings.account_holder})</span>
                     </div>
-                    <AccountChip bank={settings.bank_name} account={settings.account_number} holder={settings.account_holder} />
+                    {/* 계좌번호 한 줄 전체 폭 — 금융앱 붙여넣기를 위해 번호만 복사 */}
+                    <div className="flex items-center justify-between gap-3 border-t border-primary/10 pt-2">
+                      <span className="text-lg font-extrabold tabular-nums tracking-tight truncate">{settings.account_number}</span>
+                      <AccountChip account={settings.account_number} />
+                    </div>
                   </div>
                 )}
 
@@ -323,16 +326,17 @@ export default function LookupPage() {
   );
 }
 
-/** 입금 계좌 칩 — 클릭 시 은행·계좌·예금주를 한 번에 복사 */
-function AccountChip({ bank, account, holder }: { bank: string; account: string; holder: string }) {
+/** 계좌번호 복사 칩 — 금융앱에 바로 붙여넣을 수 있도록 계좌번호만 복사 */
+function AccountChip({ account }: { account: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
       type="button"
-      aria-label="계좌 복사"
+      aria-label="계좌번호 복사"
+      title="계좌번호만 복사됩니다"
       onClick={async () => {
         try {
-          await navigator.clipboard.writeText(`${bank} ${account} ${holder}`);
+          await navigator.clipboard.writeText(account);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } catch { /* 클립보드 권한 없음 */ }
