@@ -61,24 +61,24 @@ export default async function Home() {
               {settings.tagline}
             </p>
           )}
-          {/* CTA: 가격 칩과 예약하기 버튼 — 그리드 2등분으로 가로폭 완전 동일, 세로 48px, 글자 중앙정렬 */}
-          <div className="mt-6 grid [grid-template-columns:repeat(3,minmax(0,1fr))] gap-2.5 w-full max-w-md">
-            <div className="h-12 rounded-xl bg-white/95 text-foreground shadow-pop flex items-center justify-center gap-2">
+          {/* CTA: 가격 칩(내용에 맞춰 폭 자동) + 예약하기(남은 폭 채움) — 글자 길이가 늘어나도 칩이 자연스럽게 커짐 */}
+          <div className="mt-6 flex gap-2.5 w-full max-w-md">
+            <div className="h-12 px-3 sm:px-4 rounded-xl bg-white/95 text-foreground shadow-pop inline-flex items-center justify-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap">
               <span className="text-xs font-bold text-muted-foreground">1인·1박</span>
               <span className="text-base font-black text-primary tabular-nums">{fmtWon(settings.per_person_price)}</span>
             </div>
             {settings.booking_paused ? (
-              <div className="h-12 rounded-xl bg-white/25 text-white flex items-center justify-center gap-2 text-sm font-bold backdrop-blur cursor-not-allowed border border-white/30">
+              <div className="flex-1 h-12 rounded-xl bg-white/25 text-white inline-flex items-center justify-center gap-2 text-sm font-bold backdrop-blur cursor-not-allowed border border-white/30">
                 예약 일시 중지
               </div>
             ) : (
-              <Link href="/reserve" className="btn-primary h-12 !py-0 !rounded-xl !text-base">
+              <Link href="/reserve" className="btn-primary flex-1 h-12 !py-0 !rounded-xl !text-base">
                 예약하기 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
             {/* 모바일에서는 하단 고정바와 중복되므로 PC(sm+)에서만 표시 */}
             <Link href="/lookup"
-              className="h-12 !py-0 !rounded-xl hidden sm:inline-flex items-center justify-center gap-1.5 text-sm font-bold bg-white/15 text-white border border-white/30 backdrop-blur hover:bg-white/25 transition-colors"
+              className="flex-1 h-12 !py-0 !rounded-xl hidden sm:inline-flex items-center justify-center gap-1.5 text-sm font-bold bg-white/15 text-white border border-white/30 backdrop-blur hover:bg-white/25 transition-colors"
               title="이름·연락처로 내 예약 찾기">
               <Search className="w-4 h-4" /> 예약조회
             </Link>

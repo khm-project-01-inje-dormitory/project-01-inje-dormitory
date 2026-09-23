@@ -19,7 +19,7 @@ export default function ReservationForm({ price, maxGuests, autoCloseOverbook }:
   const [phone, setPhone] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(2);
+  const [guests, setGuests] = useState(1);
   const [depositor, setDepositor] = useState("");
   const [message, setMessage] = useState("");
   const [days, setDays] = useState<DayAvailability[]>([]);
