@@ -120,14 +120,16 @@ export default function SecurityTab() {
             <span className="badge bg-success/10 text-success border border-success/20"><MailCheck className="w-3 h-3" /> 인증 완료</span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed break-keep">
           비밀번호 분실 시 <b className="text-foreground">인증된 이메일로 찾을 수 있어요</b>. 로그인 화면의
           "비밀번호 찾기"에서 복구 안내(또는 재설정 링크)를 받을 수 있습니다. 인증된 이메일만 복구에 사용됩니다.
         </p>
         {status && !status.emailConfigured && (
           <div className="flex items-start gap-2 rounded-xl bg-warning/10 border border-warning/20 text-warning px-4 py-3 text-sm font-medium">
             <TriangleAlert className="w-4 h-4 mt-0.5 shrink-0" />
-            이메일 발송 설정이 필요합니다 — Vercel 환경변수에 <b>RESEND_API_KEY</b>를 추가한 뒤 다시 시도해 주세요.
+            <span className="break-keep leading-relaxed">
+              이메일 발송 설정이 필요합니다 — Vercel 환경변수에 <span className="font-bold whitespace-nowrap">RESEND_API_KEY</span>를 추가한 뒤 다시 시도해 주세요.
+            </span>
           </div>
         )}
         <div className="flex flex-col sm:flex-row gap-2">
@@ -177,7 +179,7 @@ export default function SecurityTab() {
           <ShieldCheck className="w-5 h-5 text-primary" />
           <h3 className="font-black">비밀번호 찾기 방식</h3>
         </div>
-        <ul className="text-sm text-muted-foreground space-y-2 leading-relaxed">
+        <ul className="text-sm text-muted-foreground space-y-2 leading-relaxed break-keep">
           <li>• 비밀번호 변경 이력이 {status?.hasHash ? (
             <><b className="text-foreground">있음</b> → 인증된 이메일로 <b className="text-foreground">1회용 재설정 링크</b>를 보내드립니다 (15분 유효).</>
           ) : (
