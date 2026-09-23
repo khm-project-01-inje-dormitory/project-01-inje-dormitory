@@ -289,7 +289,7 @@ export default function LookupPage() {
                   reviewedCodes.has(r.code) || reviewCode === r.code ? (
                     reviewCode === r.code ? (
                       <div className="mt-4 rounded-xl bg-primary-soft/60 border border-primary/10 p-4 space-y-3">
-                        <p className="text-sm font-bold">투숙은 어떠셨나요?</p>
+                        <p className="text-sm font-bold">투숙은 어떠셨나요? <span className="text-xs font-semibold text-muted-foreground">투숙경험은 다음 여행자에게 소중한 정보가 됩니다.</span></p>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5].map((i) => (
                             <button key={i} onClick={() => setRating(i)} aria-label={`${i}점`}>
