@@ -3,6 +3,7 @@
 //  테이블/버킷 구성은 supabase/schema.sql 참조
 // ─────────────────────────────────────────────────────────────
 import "server-only";
+import crypto from "node:crypto";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_SERVICE, SUPABASE_URL } from "./mode";
 import type {
@@ -274,13 +275,22 @@ export const supabaseStore = {
 
 };
 
-/** Storage 'photos' 버킷 업로드 (API route에서 multipart 파일 수신 후 호출) */
+/**
+ * Storage 'photos' 버킷 업로드 (API route에서 multipart 파일 수신 후 호출)
+ * L-4: 파일명에 시각(예측 가능) 대신 randomUUID를 사용해 열거 공격 방어.
+ *      원본 파일명은 버려지고, 확장자만 화이트리스트에서 유지한다.
+ */
+const ALLOWED_EXT: Record<string, true> = { ".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".gif": true };
+
 export async function uploadToSupabaseStorage(
   file: Buffer,
   filename: string,
   contentType: string
 ): Promise<string> {
-  const pathInBucket = `${Date.now()}-${filename}`;
+  const dot = filename.lastIndexOf(".");
+  const rawExt = dot >= 0 ? filename.slice(dot).toLowerCase() : "";
+  const ext = ALLOWED_EXT[rawExt] ? rawExt : ".jpg";
+  const pathInBucket = `${crypto.randomUUID()}${ext}`;
   const { error } = await db()
     .storage.from("photos")
     .upload(pathInBucket, file, { contentType, upsert: false });

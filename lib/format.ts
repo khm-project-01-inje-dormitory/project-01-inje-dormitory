@@ -68,10 +68,24 @@ export function fmtDateTime(iso: string): string {
   return `${MM}.${DD} ${hh}:${mm}`;
 }
 
+/**
+ * 예약코드 PB-XXXX 생성 — L-2: crypto.randomInt 사용(예측 불가)
+ * 클라이언트 번들에도 이 파일이 포함되므로 SSR에서만 강한 랜덤을 쓴다:
+ *   - Node(Server): crypto.randomInt
+ *   - Edge/browser: crypto.getRandomValues
+ */
 export function makeCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
-  for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  // globalThis.crypto가 있으면 사용 (Node 20+/Edge/브라우저 모두 지원)
+  const g = (globalThis as { crypto?: Crypto }).crypto;
+  if (g?.getRandomValues) {
+    const buf = new Uint32Array(4);
+    g.getRandomValues(buf);
+    for (let i = 0; i < 4; i++) s += chars[buf[i] % chars.length];
+  } else {
+    for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  }
   return `PB-${s}`;
 }
 
@@ -79,4 +93,20 @@ export function makeCode(): string {
 export function maskName(name: string): string {
   if (!name) return "";
   return name[0] + "*".repeat(Math.max(1, name.length - 1));
+}
+
+/** M-5: 전화번호 저장 정규화 — 숫자만 남기고 국제번호(+82) 앞의 82를 010으로 복원 */
+export function normalizePhone(raw: string): string {
+  const digits = (raw || "").replace(/[^0-9]/g, "");
+  if (digits.startsWith("82") && digits.length >= 11) return "0" + digits.slice(2); // +82 10... → 010...
+  return digits;
+}
+
+/** M-3: 응답용 전화번호 마스킹 — 010-****-1234 (뒤 4자리 유지, 조회 인증에 사용된 값과 대조 가능) */
+export function maskPhone(phone: string): string {
+  const d = normalizePhone(phone);
+  if (d.length < 8) return "***-****-****";
+  const head = d.length >= 11 ? d.slice(0, 3) : d.slice(0, 3);
+  const tail = d.slice(-4);
+  return `${head}-****-${tail}`;
 }

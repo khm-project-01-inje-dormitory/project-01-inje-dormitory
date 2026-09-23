@@ -31,8 +31,8 @@ export async function POST(req: Request) {
   // 이메일 저장 + 인증 상태 초기화
   await store.updateSettings({ admin_email: email, admin_email_verified: false });
 
-  // 6자리 코드 — 10분 유효, 해시 저장
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  // 6자리 코드 — 10분 유효, 해시 저장 (L-2: crypto.randomInt로 예측 불가)
+  const code = String(crypto.randomInt(100000, 1000000));
   await store.saveEmailToken({
     id: crypto.randomUUID(),
     email,

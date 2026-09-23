@@ -13,7 +13,16 @@ const HEAD = [
   "체크인", "체크아웃", "박수", "인원", "1인가격", "총액", "요청사항", "신청일시",
 ];
 
-const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+/**
+ * CSV 셀 이스케이프 — 큰따옴표 이스케이프 + CSV 인젝션 방어 (M-4)
+ * 값이 =, +, -, @, |, \t, \r 로 시작하면 앞에 어퍼스트로피(')를 붙여
+ * 엑셀/구글시트가 함수(수식/명령)로 해석하지 않도록 한다.
+ */
+const esc = (v: string) => {
+  const s = (v ?? "").toString();
+  const guarded = /^[=+\-@|\t\r]/.test(s) ? `'${s}` : s;
+  return `"${guarded.replace(/"/g, '""')}"`;
+};
 
 /** 관리자: 기간별 예약 CSV 내보내기 (엑셀 한글 호환 — BOM + CRLF) */
 export async function GET(req: Request) {

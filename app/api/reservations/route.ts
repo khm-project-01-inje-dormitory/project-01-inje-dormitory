@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { store, computeAvailability } from "@/lib/store";
 import { isAdmin } from "@/lib/auth";
 import { notifyAdmins } from "@/lib/push";
-import { makeCode, nightsBetween, todayKST } from "@/lib/format";
+import { makeCode, nightsBetween, normalizePhone, todayKST } from "@/lib/format";
+import { checkRate } from "@/lib/rate-limit";
 
 // 설정·예약 현황은 실시간 변하므로 빌드 시점 정적 고정 금지 (매 요청 최신 값 응답)
 export const dynamic = "force-dynamic";
@@ -18,9 +19,14 @@ export async function GET(req: Request) {
 /** 공개: 예약 신청 → 휴무일/인원 정책 검사 → 관리자 푸시 발송 */
 export async function POST(req: Request) {
   try {
+    const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+    const gate = checkRate(`reserve:${ip}`, 10, 600_000); // 10분에 10회
+    if (!gate.ok)
+      return NextResponse.json({ error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." }, { status: 429 });
+
     const body = await req.json().catch(() => ({}));
     const guest_name = String(body.guest_name ?? "").trim();
-    const phone = String(body.phone ?? "").trim();
+    const phone = normalizePhone(String(body.phone ?? "").trim()); // M-5: 저장 형식 통일
     const check_in = String(body.check_in ?? "").trim();
     const check_out = String(body.check_out ?? "").trim();
     const guests = Math.floor(Number(body.guests));

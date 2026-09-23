@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { store } from "@/lib/store";
+import { hashPassword } from "@/lib/auth";
 
 const sha256 = (v: string) => crypto.createHash("sha256").update(v).digest("hex");
 
@@ -23,9 +24,8 @@ export async function POST(req: Request) {
   if (!hit)
     return NextResponse.json({ error: "링크가 유효하지 않거나 만료되었습니다. 비밀번호 찾기를 다시 진행해 주세요." }, { status: 400 });
 
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.createHash("sha256").update(salt + password).digest("hex");
-  await store.updateSettings({ admin_password_hash: `${salt}:${hash}` });
+  // L-1: scrypt 기반 강한 KDF
+  await store.updateSettings({ admin_password_hash: hashPassword(password) });
   await store.markEmailTokenUsed(hit.id);
   await store.addAuditLog({ action: "password_reset", target_id: "admin", target_label: `비밀번호 재설정 (이메일 링크): ${hit.email}` });
   return NextResponse.json({ ok: true });

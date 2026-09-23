@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { store, computeAvailability } from "@/lib/store";
 import { notifyAdmins } from "@/lib/push";
-import { nightsBetween } from "@/lib/format";
+import { nightsBetween, maskPhone } from "@/lib/format";
+import { checkRate } from "@/lib/rate-limit";
 
 const normPhone = (s: string) => s.replace(/[^0-9]/g, "");
 
 /** 공개: 예약자 본인 수정 — 입금대기(pending)에서만, 날짜/인원 변경 (관리자 푸시 발송) */
 export async function POST(req: Request) {
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+  const gate = checkRate(`edit:${ip}`, 10, 600_000);
+  if (!gate.ok)
+    return NextResponse.json({ error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." }, { status: 429 });
+
   const body = await req.json().catch(() => ({}));
   const phone = normPhone(String(body.phone ?? ""));
   const id = String(body.id ?? "");
@@ -65,5 +71,6 @@ export async function POST(req: Request) {
     `${found.check_in}~${found.check_out} ${found.guests}명 → ${check_in}~${check_out} ${guests}명 · ${total.toLocaleString("ko-KR")}원`,
     "/admin"
   );
-  return NextResponse.json({ reservation: updated });
+  // M-3: 응답에서 전화번호 마스킹
+  return NextResponse.json({ reservation: updated ? { ...updated, phone: maskPhone(updated.phone) } : updated });
 }

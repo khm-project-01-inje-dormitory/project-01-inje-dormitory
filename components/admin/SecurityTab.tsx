@@ -109,8 +109,23 @@ export default function SecurityTab() {
     }
   }
 
+  const needsSetup = status && (!status.verified || !status.hasHash);
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+      {/* 최초 진입자 안전 배너 — 이메일 인증 or 비밀번호 변경이 안 되어 있으면 강조 */}
+      {needsSetup && (
+        <div className="rounded-xl border-2 border-warning/40 bg-warning/10 text-warning px-4 py-3 flex items-start gap-2">
+          <TriangleAlert className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="text-sm break-keep leading-relaxed">
+            <b>보안 설정을 완료해 주세요</b> —{" "}
+            {!status?.verified && "① 이메일 인증(분실 시 복구 필수) "}
+            {!status?.hasHash && "② 비밀번호 변경(초기 비밀번호는 임시용) "}
+            을(를) 마쳐야 계정을 안전하게 운영할 수 있습니다. 이메일 인증 없이 비밀번호를 변경한 뒤
+            분실하면 <b>Vercel 환경변수 재설정 없이는 복구할 수 없습니다.</b>
+          </div>
+        </div>
+      )}
       {/* ── 인증된 이메일 (비밀번호 찾기) ── */}
       <section className="card-surface p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-2">

@@ -37,6 +37,12 @@ export async function PATCH(req: Request) {
   for (const k of ["address", "map_link", "parking_info", "arrival_info"] as const) {
     if (body[k] !== undefined) body[k] = String(body[k]).trim().slice(0, STR_LIMIT);
   }
+  // H-4: map_link 스킴 화이트리스트 — javascript:/data:/vbscript: 등 XSS 스킴 차단
+  if (body.map_link !== undefined && body.map_link !== "") {
+    const url = String(body.map_link);
+    if (!/^(https?:|geo:)/i.test(url))
+      return NextResponse.json({ error: "지도 링크는 http/https 또는 geo: 형식만 허용됩니다." }, { status: 400 });
+  }
 
   // 보안 필드는 전용 엔드포인트(보안 탭·복구 API)에서만 변경 — 설정 PATCH로 직접 조작 차단
   for (const k of ["admin_password_hash", "admin_email", "admin_email_verified"] as const) delete body[k];

@@ -6,7 +6,7 @@
 -- 1) 예약
 create table if not exists reservations (
   id uuid primary key default gen_random_uuid(),
-  code text not null,                          -- 예약코드 (PB-XXXX, 참고용)
+  code text not null unique,                   -- 예약코드 (PB-XXXX) — 중복 방지 UNIQUE (M-2)
   guest_name text not null,
   phone text not null,
   check_in date not null,
@@ -161,6 +161,17 @@ alter table settings add column if not exists admin_password_hash text not null 
 -- 업그레이드: 관리자 보안 — 인증된 이메일 + 비밀번호 복구 토큰 (이메일 찾기)
 alter table settings add column if not exists admin_email text not null default '';
 alter table settings add column if not exists admin_email_verified boolean not null default false;
+
+-- M-2: 기존 설치본의 reservations.code에 UNIQUE 제약 추가 (멱등 — 중복 없으면 성공)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'reservations_code_key' and conrelid = 'reservations'::regclass
+  ) then
+    -- 중복이 있으면 실패 → 사용자가 데이터 정리 후 재실행. 자동 정리는 위험해서 하지 않음.
+    alter table reservations add constraint reservations_code_key unique (code);
+  end if;
+end $$;
 
 create table if not exists admin_email_tokens (
   id uuid primary key default gen_random_uuid(),
