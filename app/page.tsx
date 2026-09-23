@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Banknote, CarFront, Clock3, Footprints, Home as HomeIcon, MapPin, Sparkles, Star, Users, Search } from "lucide-react";
+import { ArrowRight, Banknote, CarFront, Clock3, Footprints, Home as HomeIcon, MapPin, Phone, Settings2, Sparkles, Star, Users, Search } from "lucide-react";
 import PhotoGallery from "@/components/PhotoGallery";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import { store, computeAvailability } from "@/lib/store";
@@ -190,14 +190,12 @@ export default async function Home() {
         {/* ── 위치 · 주차 안내 ── */}
         {(settings.address || settings.map_link || settings.parking_info || settings.arrival_info) && (
           <section className="card-surface p-6">
-            <h2 className="text-xl font-black mb-3 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" /> 오시는 길
-            </h2>
+            <h2 className="text-xl font-black mb-3">오시는 길</h2>
             <div className="space-y-2.5 text-sm">
               {/* 라벨-값 인접 좌측 정렬: 긴 주소도 왼쪽 기준 자연 줄바꿈 (break-keep) */}
               {settings.address && (
                 <div className="flex items-start gap-3">
-                  <span className="w-16 shrink-0 text-muted-foreground">주소</span>
+                  <span className="w-16 shrink-0 text-muted-foreground flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />주소</span>
                   <span className="font-semibold break-keep">{settings.address}</span>
                 </div>
               )}
@@ -224,9 +222,36 @@ export default async function Home() {
 
         <section className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{settings.description}</section>
 
-        <footer className="border-t border-border py-8 flex items-center justify-between text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} {settings.pension_name}</span>
-          <Link href="/admin" className="hover:text-foreground">관리자 페이지</Link>
+        {/* ── 푸터: 카드형 브랜드 블록 ── */}
+        <footer className="card-surface p-6 sm:p-8">
+          <div className="flex items-center gap-2">
+            <span className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center shrink-0">
+              <HomeIcon className="w-4.5 h-4.5" />
+            </span>
+            <div className="min-w-0">
+              <div className="font-black truncate">{settings.pension_name}</div>
+              <div className="text-xs text-muted-foreground">집 전체 대여 · 1인 1박</div>
+            </div>
+          </div>
+          {(settings.contact_phone || settings.address) && (
+            <div className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+              {settings.contact_phone && (
+                <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 shrink-0" /> {settings.contact_phone}</div>
+              )}
+              {settings.address && (
+                <div className="flex items-start gap-2 break-keep"><MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {settings.address}</div>
+              )}
+            </div>
+          )}
+          <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} {settings.pension_name}</span>
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/40 px-3.5 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 transition"
+            >
+              <Settings2 className="w-3.5 h-3.5" /> 관리자 페이지
+            </Link>
+          </div>
         </footer>
       </div>
 
