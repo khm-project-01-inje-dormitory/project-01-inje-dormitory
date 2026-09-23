@@ -55,8 +55,8 @@ export default function EditReservationDialog({ reservation, onClose, onSaved }:
           <button onClick={onClose} className="w-8 h-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted"><X className="w-4 h-4" /></button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="label">체크인</label><input type="date" className="input" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} /></div>
-          <div><label className="label">체크아웃</label><input type="date" className="input" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} /></div>
+          <div><label className="label">체크인</label><input type="date" className="input !px-2.5 !text-sm min-w-0" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} /></div>
+          <div><label className="label">체크아웃</label><input type="date" className="input !px-2.5 !text-sm min-w-0" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} /></div>
         </div>
         <div><label className="label">투숙 인원</label>
           <input type="text" inputMode="numeric" className="input max-w-[120px]" value={guests} onChange={(e) => setGuests(e.target.value.replace(/\D/g, "").slice(0, 3))} />
