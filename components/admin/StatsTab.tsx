@@ -89,8 +89,8 @@ export default function StatsTab({ onGoto }: { onGoto: (t: "deposits" | "reserva
             sub="신청 → 체크인까지 평균 기간" hint="홍보 게시를 언제 올리면 좋은지 판단 기준" />
           <StatCard icon={<MoonStar className="w-5 h-5" />} label="평균 숙박일" value={c.avgNights ? `${c.avgNights}박` : "-"}
             sub="확정·완료 예약 기준" />
-          <StatCard icon={<Repeat2 className="w-5 h-5" />} label="재방문 손님" value={`${c.repeatGuests}조`}
-            sub="2회 이상 투숙한 연락처" hint="재방문이 늘면 단골 혜택 고려" />
+          <StatCard icon={<Repeat2 className="w-5 h-5" />} label="재방문 손님" value={`${c.repeatGuests}팀`}
+            sub="2회 이상 투숙한 연락처(팀 단위)" hint="재방문이 늘면 단골 혜택 고려" />
           <StatCard icon={<Undo2 className="w-5 h-5" />} label="환불 대기" value={`${c.refundPendingCount}건`}
             sub={fmtWon(c.refundPendingAmount)} tone={c.refundPendingCount > 0 ? "warning" : "default"} />
         </div>

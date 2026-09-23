@@ -107,6 +107,8 @@ export default function LookupPage() {
       await lookup();
     } catch (e) {
       setEditMsg(e instanceof Error ? e.message : "수정 실패");
+    } finally {
+      // 성공·실패 무관 busy 항상 리셋 — 저장 성공 후 재진입 시 "저장 중…" 프리징 방지
       setEditBusy(false);
     }
   }

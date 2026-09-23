@@ -76,8 +76,9 @@ export default async function Home() {
                 예약하기 <ArrowRight className="w-4 h-4" />
               </Link>
             )}
+            {/* 모바일에서는 하단 고정바와 중복되므로 PC(sm+)에서만 표시 */}
             <Link href="/lookup"
-              className="h-12 !py-0 !rounded-xl inline-flex items-center justify-center gap-1.5 text-sm font-bold bg-white/15 text-white border border-white/30 backdrop-blur hover:bg-white/25 transition-colors"
+              className="h-12 !py-0 !rounded-xl hidden sm:inline-flex items-center justify-center gap-1.5 text-sm font-bold bg-white/15 text-white border border-white/30 backdrop-blur hover:bg-white/25 transition-colors"
               title="이름·연락처로 내 예약 찾기">
               <Search className="w-4 h-4" /> 예약조회
             </Link>

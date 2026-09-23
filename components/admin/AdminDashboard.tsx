@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  BarChart3, Banknote, CalendarCheck2, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2, LogOut } from "lucide-react";
+  BarChart3, Banknote, CalendarCheck2, ExternalLink, Images, Loader2, MessageSquareQuote, RefreshCw, Settings2, LogOut } from "lucide-react";
 import StatsTab from "./StatsTab";
 import ReservationTable from "./ReservationTable";
 import GalleryTab from "./GalleryTab";
@@ -42,21 +42,30 @@ export default function AdminDashboard({ modeLabel }: { modeLabel: string }) {
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-lg font-black truncate">{settings?.pension_name ?? "관리자"} · 대시보드</h1>
+            {/* 모바일: 숙소명이 길어 잘리므로 짧은 고정 제목, PC(sm+): 전체 제목 */}
+            <h1 className="text-lg font-black truncate">
+              <span className="sm:hidden">관리자 모드</span>
+              <span className="hidden sm:inline">{settings?.pension_name ?? "관리자"} · 대시보드</span>
+            </h1>
             <p className="text-[11px] text-muted-foreground">{modeLabel}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center hover:bg-muted" onClick={refresh} title="새로고침">
+            <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center hover:bg-muted" onClick={refresh} title="새로고침" aria-label="새로고침">
               <RefreshCw className="w-4 h-4" />
             </button>
-            <a href="/" className="btn-soft !px-3 !py-2 text-xs">사이트 보기</a>
-            <button className="btn-outline !px-3 !py-2 text-xs inline-flex items-center gap-1.5"
+            {/* 모바일: 아이콘 전용(터치 타깃 확보), PC: 텍스트 버튼 */}
+            <a href="/" className="btn-soft !px-3 !py-2.5 text-xs inline-flex items-center gap-1.5" aria-label="사이트 보기">
+              <ExternalLink className="w-4 h-4 sm:hidden" />
+              <span className="hidden sm:inline">사이트 보기</span>
+            </a>
+            <button className="btn-outline !px-3 !py-2.5 text-xs inline-flex items-center gap-1.5" aria-label="로그아웃"
               onClick={async () => {
                 if (!confirm("로그아웃하시겠습니까?")) return;
                 try { await fetch("/api/admin/logout", { method: "POST" }); } catch { /* 네트워크 오류에도 로그인 화면으로 */ }
                 window.location.href = "/admin";
               }}>
-              <LogOut className="w-3.5 h-3.5" /> 로그아웃
+              <LogOut className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">로그아웃</span>
             </button>
           </div>
         </div>

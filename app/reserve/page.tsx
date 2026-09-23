@@ -53,7 +53,7 @@ export default async function ReservePage() {
           </p>
         </div>
       </div>
-      <ReservationForm price={settings.per_person_price} maxGuests={settings.max_guests} />
+      <ReservationForm price={settings.per_person_price} maxGuests={settings.max_guests} autoCloseOverbook={Boolean(settings.auto_close_overbook)} />
     </main>
   );
 }

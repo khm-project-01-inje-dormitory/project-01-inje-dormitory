@@ -9,9 +9,11 @@ import type { DayAvailability } from "@/types";
 interface Props {
   price: number;
   maxGuests: number;
+  /** 인원 마감 정책 — true: 초과박 자동 차단(불가 안내), false: 경고 후 접수(관리자 확인 안내) */
+  autoCloseOverbook: boolean;
 }
 
-export default function ReservationForm({ price, maxGuests }: Props) {
+export default function ReservationForm({ price, maxGuests, autoCloseOverbook }: Props) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -173,7 +175,16 @@ export default function ReservationForm({ price, maxGuests }: Props) {
       {overNights > 0 && blockedNights === 0 && (
         <div className="flex items-start gap-2 rounded-xl bg-warning/10 border border-warning/20 text-warning px-4 py-3 text-sm font-medium">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-          선택한 기간 중 {overNights}박이 수용 인원({maxGuests}명)을 초과합니다. 관리자 확인 후 거절될 수 있어요.
+          {autoCloseOverbook ? (
+            // 자동 차단 모드 — 서버가 신청 자체를 거부하므로 "불가" 기준으로 안내
+            <span>
+              선택한 기간 중 {overNights}박이 수용인원({maxGuests}명)을 초과합니다. 최대 수용인원을 넘어 예약할 경우 예약이
+              불가능해요. 관리자 문의 후 예약을 진행해 주세요.
+            </span>
+          ) : (
+            // 경고 후 접수 모드 — 신청은 가능하며 관리자가 승인/거절
+            <span>선택한 기간 중 {overNights}박이 수용 인원({maxGuests}명)을 초과합니다. 관리자 확인 후 거절될 수 있어요.</span>
+          )}
         </div>
       )}
 

@@ -12,6 +12,9 @@ const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
 const KST_DATE = (iso: string) => new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
 
+/** 전화번호 정규화 — 하이픈·공백 표기 차이로 같은 손님이 다르게 집계되는 것 방지 */
+const phoneKey = (p: string) => p.replace(/\D/g, "");
+
 /** 관리자: 대시보드 통계 (매출/예약 추이 + 운영 인사이트) */
 export async function GET(req: Request) {
   if (!isAdmin(req)) return NextResponse.json({ error: "권한 없음" }, { status: 401 });
@@ -50,8 +53,8 @@ export async function GET(req: Request) {
     avgNights: paid.length
       ? Math.round((paid.reduce((s, r) => s + r.nights, 0) / paid.length) * 10) / 10
       : 0,
-    repeatGuests: [...new Set(paid.map((r) => r.phone))].filter(
-      (p) => paid.filter((r) => r.phone === p).length >= 2
+    repeatGuests: [...new Set(paid.map((r) => phoneKey(r.phone)))].filter(
+      (k) => paid.filter((r) => phoneKey(r.phone) === k).length >= 2
     ).length,
     refundPendingCount: refundPending.length,
     refundPendingAmount: refundPending.reduce((s, r) => s + r.total_amount, 0),
