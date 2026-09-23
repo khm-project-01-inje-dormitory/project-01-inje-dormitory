@@ -118,11 +118,11 @@ export default function ReservationForm({ price, maxGuests, autoCloseOverbook }:
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">체크인</label>
-            <input className="input" type="date" min={today} value={checkIn} onChange={(e) => onChangeCheckIn(e.target.value)} />
+            <input className="input !px-2.5 !text-sm min-w-0" type="date" min={today} value={checkIn} onChange={(e) => onChangeCheckIn(e.target.value)} />
           </div>
           <div>
             <label className="label">체크아웃</label>
-            <input className="input" type="date" min={checkIn || today} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+            <input className="input !px-2.5 !text-sm min-w-0" type="date" min={checkIn || today} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
           </div>
         </div>
         <div>

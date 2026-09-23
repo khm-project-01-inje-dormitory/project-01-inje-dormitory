@@ -26,7 +26,8 @@ export default function DepositInfo({
 
   async function copyAccount() {
     try {
-      await navigator.clipboard.writeText(`${bank} ${account} ${holder}`);
+      // 금융앱 붙여넣기를 위해 계좌번호만 복사 (은행·예금주 제외)
+      await navigator.clipboard.writeText(account);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -38,10 +39,8 @@ export default function DepositInfo({
     <div className="card-surface p-5 sm:p-6 space-y-4">
       <div className="text-sm font-bold text-muted-foreground">입금 계좌</div>
       <div className="rounded-xl bg-primary-soft border border-primary/10 px-4 py-4">
-        <div className="text-xl font-extrabold tracking-tight">
-          {bank} <span className="tabular-nums">{account}</span>
-        </div>
-        <div className="text-sm text-muted-foreground mt-0.5">예금주 {holder}</div>
+        <div className="text-sm font-bold">{bank}({holder})</div>
+        <div className="text-2xl font-extrabold tabular-nums tracking-tight mt-1 break-all">{account}</div>
       </div>
       <div className="flex items-center justify-between rounded-xl border border-border px-4 py-3">
         <span className="text-sm font-semibold">입금하실 금액</span>
