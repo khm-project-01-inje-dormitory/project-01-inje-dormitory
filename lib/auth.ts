@@ -5,9 +5,15 @@
 import "server-only";
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
+import { isDemoMode } from "./mode";
 
 const COOKIE = "pr_admin";
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+/**
+ * [v1.2] env 초기 비밀번호 — 기본값 없음.
+ *  - 미설정이면 env 로그인 경로 자체가 비활성화된다 (admin1234 기본값 부활 금지).
+ *  - DB 해시가 존재하면 이 값은 아예 조회되지 않는다(verifyAdminPassword 참조).
+ */
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
 /**
  * 비밀번호 해시 유틸 — 두 포맷을 모두 지원 (L-1 마이그레이션)
@@ -54,15 +60,31 @@ export function needsRehash(saved?: string | null): boolean {
   return Boolean(saved && !saved.startsWith("scrypt$") && saved.includes(":"));
 }
 
-/** DB 저장 해시 검증 — 있으면 그것만 신뢰, 없으면 env로 폴백 (해시 있으면 env 폴백 차단) */
+/**
+ * DB 저장 해시 검증 — 있으면 그것만 신뢰 (해시 있으면 env 폴백 차단).
+ * [v1.2] 폴백 규칙 강화:
+ *  - 운영 모드에서 DB 조회가 실패하면 env 폴백하지 않고 로그인을 거부한다
+ *    (Supabase 장애·PGRST303 시계 드리프트 중에도 "해시 있음" 설치본에 env 우회
+ *    로그인이 통하지 않게 한다).
+ *  - env 폴백은 데모 모드(로컬, DB 없음)에서만 동작하며, env가 비어 있으면
+ *    기본 비밀번호를 만들지 않고 거부한다.
+ */
 export async function verifyAdminPassword(password: string): Promise<boolean> {
+  let saved: string | undefined;
   try {
     const { store } = await import("./store");
     const st = await store.getSettings();
-    const saved = (st as { admin_password_hash?: string }).admin_password_hash;
-    if (saved) return verifyHash(saved, password);
-  } catch { /* DB 조회 실패 시에만 환경변수로 폴백 */ }
-  return password === ADMIN_PASSWORD;
+    saved = (st as { admin_password_hash?: string }).admin_password_hash;
+  } catch (err) {
+    if (!isDemoMode) {
+      // 운영 모드: DB 장애를 "행 없음"으로 위장해 env 우회를 여는 것을 금지
+      console.error("[auth] 운영 DB 조회 실패 — 로그인 거부:", err);
+      return false;
+    }
+    // 데모 모드(로컬)에서만 env 폴백 허용
+  }
+  if (saved) return verifyHash(saved, password);
+  return Boolean(ADMIN_PASSWORD) && password === ADMIN_PASSWORD;
 }
 /**
  * 세션 서명 키 — 프로덕션에서 미설정/기본값이면 부팅 실패로 유도 (H-3).

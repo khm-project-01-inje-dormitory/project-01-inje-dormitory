@@ -39,11 +39,15 @@ export async function POST(req: Request) {
 
   if (!settings.admin_password_hash) {
     // 비밀번호 변경 이력 없음 → 환경변수(초기) 비밀번호 발송
-    sent = await sendEmail(
-      email,
-      `[${settings.pension_name}] 관리자 비밀번호 안내`,
-      `요청하신 관리자 비밀번호 안내입니다.\n\n비밀번호: ${ADMIN_PASSWORD}\n\n로그인 후 보안 탭에서 비밀번호를 변경하시길 권장합니다.\n본인이 요청하지 않았다면 이 메일은 무시하셔도 됩니다.`
-    );
+    // [v1.2] env가 비어 있으면 발송하지 않는다 — 기본 비밀번호("admin1234" 등)를
+    // 만들어 보내는 일이 없게 한다. 응답 문구는 그대로라 열거 방지도 유지된다.
+    if (ADMIN_PASSWORD) {
+      sent = await sendEmail(
+        email,
+        `[${settings.pension_name}] 관리자 비밀번호 안내`,
+        `요청하신 관리자 비밀번호 안내입니다.\n\n비밀번호: ${ADMIN_PASSWORD}\n\n로그인 후 보안 탭에서 비밀번호를 변경하시길 권장합니다.\n본인이 요청하지 않았다면 이 메일은 무시하셔도 됩니다.`
+      );
+    }
   } else {
     // 비밀번호 변경 이력 있음 → 1회용 재설정 링크 발송 (15분 유효, 해시 저장)
     const token = crypto.randomBytes(32).toString("hex");
