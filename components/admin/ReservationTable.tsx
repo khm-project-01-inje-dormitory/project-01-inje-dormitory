@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown, Undo2, Trash2, Archive } from "lucide-react";
+import { CalendarOff, CalendarRange, Check, Copy, Download, Loader2, Pencil, Search, X, XCircle, ArrowUpDown, ChevronDown, Undo2, Trash2, Archive } from "lucide-react";
 import EditReservationDialog from "./EditReservationDialog";
 import { fmtDateKorean, fmtDateTime, fmtWon, todayKST } from "@/lib/format";
 import { REFUND_LABEL, STATUS_LABEL, type Reservation, type RefundStatus, type Settings, type ReservationStatus } from "@/types";
@@ -104,9 +104,11 @@ export default function ReservationTable({
     finally { setBusyId(null); }
   }
 
-  // CSV 내보내기 기간 (기본: 3개월 전 ~ 6개월 후)
-  const [expFrom, setExpFrom] = useState(shiftDate(-90));
-  const [expTo, setExpTo] = useState(shiftDate(180));
+  // 기간 필터 (비어 있으면 전체 — CSV 내보내기는 이 기간을 따름, 기본: 3개월 전 ~ 6개월 후)
+  const [rangeFrom, setRangeFromRaw] = useState(() => loadPref("rangeFrom", ""));
+  const [rangeTo, setRangeToRaw] = useState(() => loadPref("rangeTo", ""));
+  const setRange = (from: string, to: string) => { setRangeFromRaw(from); setRangeToRaw(to); savePref("rangeFrom", from); savePref("rangeTo", to); setVisibleRaw(20); };
+  const rangeActive = Boolean(rangeFrom || rangeTo);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -173,6 +175,8 @@ export default function ReservationTable({
     if (t) list = list.filter((r) =>
       [r.guest_name, r.phone, r.code, r.depositor].some((s) => s.toLowerCase().includes(t))
     );
+    if (rangeFrom) list = list.filter((r) => r.check_in >= rangeFrom);
+    if (rangeTo) list = list.filter((r) => r.check_in <= rangeTo);
     const by: Record<typeof sortKey, (a: Reservation, b: Reservation) => number> = {
       newest: (a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""),
       checkin: (a, b) => (a.check_in + a.check_out).localeCompare(b.check_in + b.check_out),
@@ -180,7 +184,7 @@ export default function ReservationTable({
       amount_asc: (a, b) => a.total_amount - b.total_amount,
     };
     return [...list].sort(by[sortKey]);
-  }, [rows, q, statusFilter, sortKey]);
+  }, [rows, q, statusFilter, sortKey, rangeFrom, rangeTo]);
   const shown = filtered.slice(0, visible);
 
   if (loading) {
@@ -196,7 +200,7 @@ export default function ReservationTable({
           className={`badge border transition-all duration-200 select-none cursor-pointer hover:scale-[1.04] hover:shadow-sm active:scale-95 ${
             statusFilter === "all"
               ? "border-border bg-foreground text-background shadow-sm"
-              : "border-border bg-card text-muted-foreground"}`}>
+              : "border-border bg-card text-foreground/70 hover:bg-muted hover:text-foreground"}`}>
           전체 {rows.length}건
         </button>
         {([["pending", "bg-warning/10 text-warning border border-warning/20", "bg-warning/15 text-warning border-warning/40 ring-2 ring-warning/25 shadow-sm"],
@@ -225,7 +229,7 @@ export default function ReservationTable({
         )}
       </div>
       <div className="flex items-center gap-3 flex-wrap">
-        <h2 className="font-black">{mode === "pending" ? "입금 대기 예약" : `전체 예약 ${rows.length}건`}</h2>
+        <h2 className="font-black">{mode === "pending" ? "입금 대기 예약" : rangeActive || q ? `검색 결과 ${filtered.length}건` : `전체 예약 ${rows.length}건`}</h2>
         {mode === "all" && (
           <label className="relative inline-flex items-center">
             <ArrowUpDown className="w-3.5 h-3.5 absolute left-2.5 pointer-events-none text-muted-foreground" />
@@ -246,12 +250,31 @@ export default function ReservationTable({
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input className="input !pl-9 !py-2 text-sm" placeholder="이름·전화·예약코드 검색" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
+            {/* 기간 필터 — 하나의 알약 안에 시작~종료가 연결 (CSV 내보내기도 이 기간 사용) */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <input type="date" className="input !py-1.5 !px-2.5 text-xs w-[135px]" value={expFrom} onChange={(e) => setExpFrom(e.target.value)} />
-              <span className="text-xs text-muted-foreground">~</span>
-              <input type="date" className="input !py-1.5 !px-2.5 text-xs w-[135px]" value={expTo} onChange={(e) => setExpTo(e.target.value)} />
-              <a className="btn-outline !py-2 !px-3 text-xs" href={`/api/reservations/export?from=${expFrom}&to=${expTo}`} download>
-                <Download className="w-3.5 h-3.5" /> CSV 내려받기
+              <div className={`flex items-center rounded-full border bg-card transition-shadow ${rangeActive ? "border-primary/50 ring-2 ring-primary/20" : "border-border"}`}>
+                <label className="relative inline-flex items-center pl-2.5 text-muted-foreground" title="체크인 기준 기간 필터">
+                  <CalendarRange className="w-3.5 h-3.5 pointer-events-none" />
+                  <span className="sr-only">기간 필터 — 체크인 기준</span>
+                </label>
+                <input type="date" aria-label="시작일 (체크인 기준)" className="bg-transparent !py-1.5 !px-1.5 text-xs w-[118px] outline-none focus:font-semibold" value={rangeFrom} onChange={(e) => setRange(e.target.value, rangeTo)} />
+                <span className="text-muted-foreground/60 select-none" aria-hidden="true">~</span>
+                <input type="date" aria-label="종료일 (체크인 기준)" className="bg-transparent !py-1.5 !px-1.5 text-xs w-[118px] outline-none focus:font-semibold" value={rangeTo} onChange={(e) => setRange(rangeFrom, e.target.value)} />
+              </div>
+              {([["이번달", monthRange], ["+3개월", () => [shiftDate(0), shiftDate(90)] as [string, string]], ["올해", yearRange]] as const).map(([label, fn]) => (
+                <button key={label} type="button" onClick={() => setRange(...fn())}
+                  className="badge bg-foreground/5 text-foreground/80 border border-border hover:bg-muted hover:text-foreground transition-all active:scale-95 select-none cursor-pointer">
+                  {label}
+                </button>
+              ))}
+              {rangeActive && (
+                <button type="button" onClick={() => setRange("", "")} title="기간 필터 해제"
+                  className="badge bg-primary/10 text-primary border border-primary/30 hover:bg-primary/15 transition-all active:scale-95 select-none cursor-pointer">
+                  전체 보기 ✕
+                </button>
+              )}
+              <a className="btn-outline !py-2 !px-3 text-xs" href={`/api/reservations/export?from=${rangeFrom || shiftDate(-90)}&to=${rangeTo || shiftDate(180)}`} download>
+                <Download className="w-3.5 h-3.5" /> CSV
               </a>
             </div>
           </>
@@ -298,7 +321,20 @@ export default function ReservationTable({
         )
       ) : filtered.length === 0 ? (
         <div className="card-surface p-10 text-center text-muted-foreground">
-          {mode === "pending" ? "입금 대기 중인 예약이 없습니다. 👍" : statusFilter !== "all" ? `${STATUS_LABEL[statusFilter]} 예약이 없습니다.` : "예약이 없습니다."}
+          {mode === "pending" ? (
+            "입금 대기 중인 예약이 없습니다. 👍"
+          ) : rangeActive ? (
+            <>
+              <p>해당 기간(체크인 기준)의 예약이 없습니다.</p>
+              <button type="button" onClick={() => setRange("", "")} className="btn-outline !py-2 !px-4 text-sm mt-3 inline-flex items-center gap-1.5">
+                <X className="w-4 h-4" /> 기간 필터 지우고 전체 보기
+              </button>
+            </>
+          ) : statusFilter !== "all" ? (
+            `${STATUS_LABEL[statusFilter]} 예약이 없습니다.`
+          ) : (
+            "예약이 없습니다."
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -422,6 +458,19 @@ export default function ReservationTable({
 function shiftDate(days: number): string {
   const d = new Date(Date.now() + 9 * 3600000 + days * 86400000);
   return d.toISOString().slice(0, 10);
+}
+
+/** 이번달 1일 ~ 말일 (KST 기준) */
+function monthRange(): [string, string] {
+  const now = new Date(Date.now() + 9 * 3600000);
+  const y = now.getUTCFullYear(), m = now.getUTCMonth();
+  return [new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 10), new Date(Date.UTC(y, m + 1, 0)).toISOString().slice(0, 10)];
+}
+
+/** 올해 1월 1일 ~ 12월 31일 (KST 기준) */
+function yearRange(): [string, string] {
+  const y = new Date(Date.now() + 9 * 3600000).getUTCFullYear();
+  return [`${y}-01-01`, `${y}-12-31`];
 }
 
 /** 실패 원인 구분 — 네트워크/권한/서버 메시지 */
