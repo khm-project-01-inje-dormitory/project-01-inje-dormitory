@@ -22,14 +22,16 @@ function db(): SupabaseClient {
  * 짧은 대기 후 재시도하면 시계가 재동기화되며 대부분 회복된다.
  */
 const CLOCK_ERR = ["PGRST303", "JWT issued at future"];
-export async function withClockRetry<T>(op: () => Promise<{ error: { code?: string; message: string } | null }>): Promise<T> {
+export async function withClockRetry<R extends { error: { code?: string | null; message: string } | null }>(
+  op: () => Promise<R>
+): Promise<R> {
   let lastErr: unknown;
   for (let i = 0; i < 3; i++) {
-    const { error, ...rest } = await op() as { error: { code?: string; message: string } | null } & Record<string, unknown>;
-    if (!error) return rest as T;
-    const hit = CLOCK_ERR.some((k) => error.code === k || (error.message || "").includes(k));
-    lastErr = error;
-    if (!hit) throw new Error(`DB 오류: ${error.message}`);
+    const res = await op();
+    if (!res.error) return res;
+    const hit = CLOCK_ERR.some((k) => res.error!.code === k || (res.error!.message || "").includes(k));
+    lastErr = res.error;
+    if (!hit) throw new Error(`DB 오류: ${res.error.message}`);
     await new Promise((r) => setTimeout(r, 400 * (i + 1)));
   }
   throw new Error(`DB 오류(시계 동기화 대기 후에도 실패): ${String(lastErr)}`);
@@ -77,198 +79,198 @@ export const supabaseStore = {
   async getSettings(): Promise<Settings> {
     // ⚠ error를 절대 무시하지 않는다 — 무시하면 조회 실패가 "행 없음"으로 위장해
     // 아래 시드 upsert가 기존 설정(요금·인원·계좌)을 기본값으로 덮어쓰는 사고가 난다.
-    const { data, error } = await db().from("settings").select("*").eq("id", 1).maybeSingle();
+    const { data, error } = await withClockRetry(async () => db().from("settings").select("*").eq("id", 1).maybeSingle());
     if (error) throw new Error(`설정 조회 실패: ${error.message}`);
     if (data) return data as Settings;
     // 행이 정말 없을 때만 최초 1회 시드 (기존 값 덮어쓰기 없음)
-    const { error: seedErr } = await db().from("settings").upsert(SETTINGS_SEED, { onConflict: "id", ignoreDuplicates: true });
+    const { error: seedErr } = await withClockRetry(async () => db().from("settings").upsert(SETTINGS_SEED, { onConflict: "id", ignoreDuplicates: true }));
     if (seedErr) throw new Error(`설정 초기화 실패: ${seedErr.message}`);
-    const { data: seeded } = await db().from("settings").select("*").eq("id", 1).maybeSingle();
+    const { data: seeded } = await withClockRetry(async () => db().from("settings").select("*").eq("id", 1).maybeSingle());
     return (seeded ?? SETTINGS_SEED) as Settings;
   },
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("settings")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", 1)
       .select()
-      .single();
+      .single());
     if (error) throw error;
     return data as Settings;
   },
   async listReservations(): Promise<Reservation[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("reservations")
       .select("*")
       .is("deleted_at", null)          // 소프트 삭제(숨김) 건은 목록·통계에서 제외
-      .order("check_in", { ascending: true });
+      .order("check_in", { ascending: true }));
     if (error) throw error;
     return (data ?? []) as Reservation[];
   },
   /** 숨김(소프트 삭제)된 예약 목록 — 복구 화면용 */
   async listDeletedReservations(): Promise<Reservation[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("reservations")
       .select("*")
       .not("deleted_at", "is", null)
-      .order("deleted_at", { ascending: false });
+      .order("deleted_at", { ascending: false }));
     if (error) throw error;
     return (data ?? []) as Reservation[];
   },
   async addAuditLog(log: { action: string; target_id: string; target_label?: string; before?: unknown; after?: unknown }): Promise<void> {
-    await db().from("audit_logs").insert({
+    await withClockRetry(async () => db().from("audit_logs").insert({
       actor: "admin",
       action: log.action,
       target_id: log.target_id,
       target_label: log.target_label ?? "",
       before: (log.before ?? {}) as object,
       after: (log.after ?? {}) as object,
-    });
+    }));
   },
   async listAuditLogs(limit = 50): Promise<unknown[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("audit_logs")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .limit(limit));
     if (error) throw error;
     return data ?? [];
   },
   async createReservation(r: Reservation): Promise<Reservation> {
-    const { data, error } = await db().from("reservations").insert(r).select().single();
+    const { data, error } = await withClockRetry(async () => db().from("reservations").insert(r).select().single());
     if (error) throw error;
     return data as Reservation;
   },
   async getReservation(id: string): Promise<Reservation | null> {
-    const { data, error } = await db().from("reservations").select("*").eq("id", id).maybeSingle();
+    const { data, error } = await withClockRetry(async () => db().from("reservations").select("*").eq("id", id).maybeSingle());
     if (error) throw error;
     return (data as Reservation) ?? null;
   },
   async updateReservation(id: string, patch: Partial<Reservation>): Promise<Reservation | null> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("reservations")
       .update({ ...patch, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select()
-      .maybeSingle();
+      .maybeSingle());
     if (error) throw error;
     return (data as Reservation) ?? null;
   },
   async listPhotos(): Promise<Photo[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("photos")
       .select("*")
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true }));
     if (error) throw error;
     return (data ?? []) as Photo[];
   },
   async addPhoto(p: Photo): Promise<Photo> {
-    const { data, error } = await db().from("photos").insert(p).select().single();
+    const { data, error } = await withClockRetry(async () => db().from("photos").insert(p).select().single());
     if (error) throw error;
     return data as Photo;
   },
   async updatePhoto(id: string, patch: Partial<Photo>): Promise<Photo | null> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("photos")
       .update(patch)
       .eq("id", id)
       .select()
-      .maybeSingle();
+      .maybeSingle());
     if (error) throw error;
     return (data as Photo) ?? null;
   },
   async deletePhoto(id: string): Promise<boolean> {
-    const { error } = await db().from("photos").delete().eq("id", id);
+    const { error } = await withClockRetry(async () => db().from("photos").delete().eq("id", id));
     return !error;
   },
   async listBlockedDates(): Promise<BlockedDate[]> {
-    const { data } = await db()
+    const { data } = await withClockRetry(async () => db()
       .from("blocked_dates")
       .select("*")
-      .order("date", { ascending: true });
+      .order("date", { ascending: true }));
     return (data ?? []) as BlockedDate[];
   },
   async addBlockedDate(b: BlockedDate): Promise<BlockedDate> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("blocked_dates")
       .upsert(b, { onConflict: "date" })
       .select()
-      .single();
+      .single());
     if (error) throw error;
     return data as BlockedDate;
   },
   async removeBlockedDate(date: string): Promise<boolean> {
-    const { error } = await db().from("blocked_dates").delete().eq("date", date);
+    const { error } = await withClockRetry(async () => db().from("blocked_dates").delete().eq("date", date));
     return !error;
   },
   async listReviews(): Promise<Review[]> {
-    const { data } = await db()
+    const { data } = await withClockRetry(async () => db()
       .from("reviews")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }));
     return (data ?? []) as Review[];
   },
   async addReview(r: Review): Promise<Review> {
-    const { data, error } = await db().from("reviews").insert(r).select().single();
+    const { data, error } = await withClockRetry(async () => db().from("reviews").insert(r).select().single());
     if (error) throw error;
     return data as Review;
   },
   async updateReview(id: string, patch: Partial<Review>): Promise<Review | null> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("reviews")
       .update(patch)
       .eq("id", id)
       .select()
-      .maybeSingle();
+      .maybeSingle());
     if (error) throw error;
     return (data as Review) ?? null;
   },
   async deleteReview(id: string): Promise<boolean> {
-    const { error } = await db().from("reviews").delete().eq("id", id);
+    const { error } = await withClockRetry(async () => db().from("reviews").delete().eq("id", id));
     return !error;
   },
   async listPushSubscriptions(): Promise<PushSubscriptionRow[]> {
-    const { data } = await db().from("push_subscriptions").select("*");
+    const { data } = await withClockRetry(async () => db().from("push_subscriptions").select("*"));
     return (data ?? []) as PushSubscriptionRow[];
   },
   async savePushSubscription(s: PushSubscriptionRow): Promise<void> {
-    await db().from("push_subscriptions").upsert(s, { onConflict: "endpoint" });
+    await withClockRetry(async () => db().from("push_subscriptions").upsert(s, { onConflict: "endpoint" }));
   },
   async deletePushSubscription(endpoint: string): Promise<void> {
-    await db().from("push_subscriptions").delete().eq("endpoint", endpoint);
+    await withClockRetry(async () => db().from("push_subscriptions").delete().eq("endpoint", endpoint));
   },
   /** 관리자 이메일 인증·복구 토큰 */
   async saveEmailToken(t: EmailToken): Promise<void> {
-    const { error } = await db().from("admin_email_tokens").insert({
+    const { error } = await withClockRetry(async () => db().from("admin_email_tokens").insert({
       id: t.id, email: t.email, token_hash: t.token_hash, purpose: t.purpose,
       used: t.used, expires_at: t.expires_at, created_at: t.created_at,
-    });
+    }));
     if (error) throw error;
   },
   async listEmailTokens(email: string, purpose: string): Promise<EmailToken[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("admin_email_tokens")
       .select("*")
       .eq("email", email)
       .eq("purpose", purpose)
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(20));
     if (error) throw error;
     return (data ?? []) as EmailToken[];
   },
   async markEmailTokenUsed(id: string): Promise<void> {
-    const { error } = await db().from("admin_email_tokens").update({ used: true }).eq("id", id);
+    const { error } = await withClockRetry(async () => db().from("admin_email_tokens").update({ used: true }).eq("id", id));
     if (error) throw error;
   },
 
   /** 복구 토큰 전체 조회 — 로그인 전 요청이라 이메일을 특정할 수 없어 전체 대상 */
   async listAllEmailTokens(purpose: string): Promise<EmailToken[]> {
-    const { data, error } = await db()
+    const { data, error } = await withClockRetry(async () => db()
       .from("admin_email_tokens")
       .select("*")
       .eq("purpose", purpose)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(50));
     if (error) throw error;
     return (data ?? []) as EmailToken[];
   },
