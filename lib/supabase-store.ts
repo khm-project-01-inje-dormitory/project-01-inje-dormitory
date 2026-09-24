@@ -22,19 +22,21 @@ function db(): SupabaseClient {
  * 짧은 대기 후 재시도하면 시계가 재동기화되며 대부분 회복된다.
  */
 const CLOCK_ERR = ["PGRST303", "JWT issued at future"];
+const BACKOFF_MS = [500, 1000, 2000]; // 4회 시도, 총 대기 3.5s — Vercel 라우트 한도(10s) 내 최대 확보
 export async function withClockRetry<R extends { error: { code?: string | null; message: string } | null }>(
   op: () => Promise<R>
 ): Promise<R> {
   let lastErr: unknown;
-  for (let i = 0; i < 3; i++) {
+  for (let attempt = 0; attempt <= BACKOFF_MS.length; attempt++) {
     const res = await op();
     if (!res.error) return res;
     const hit = CLOCK_ERR.some((k) => res.error!.code === k || (res.error!.message || "").includes(k));
     lastErr = res.error;
     if (!hit) throw new Error(`DB 오류: ${res.error.message}`);
-    await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    if (attempt < BACKOFF_MS.length) await new Promise((r) => setTimeout(r, BACKOFF_MS[attempt]));
   }
-  throw new Error(`DB 오류(시계 동기화 대기 후에도 실패): ${String(lastErr)}`);
+  const detail = typeof lastErr === "string" ? lastErr : JSON.stringify(lastErr);
+  throw new Error(`DB 오류(시계 동기화 대기 후에도 실패): ${detail}`);
 }
 
 const SETTINGS_SEED: Partial<Settings> = {
